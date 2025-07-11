@@ -1,11 +1,10 @@
 package com.xuesinuo.pignoo.demo;
 
-import javax.sql.DataSource;
-
 import org.springframework.stereotype.Component;
 
 import com.xuesinuo.pignoo.Pignoo;
 import com.xuesinuo.pignoo.PignooList;
+import com.xuesinuo.pignoo.PignooFilter.FMode;
 import com.xuesinuo.pignoo.annotation.Column;
 import com.xuesinuo.pignoo.annotation.PrimaryKey;
 import com.xuesinuo.pignoo.annotation.Table;
@@ -28,12 +27,15 @@ public class Test01 {
         @Column("id")
         @PrimaryKey(auto = true)
         private Long id;
+
+        @Column("name")
+        private String name;
     }
 
     @PostConstruct
     public void init() {
         PignooList<Pig> pigList = pignoo.getPignooList(Pig.class);
-        pigList.add(new Pig());
+        pigList.filter(Pig::getName, FMode.IS_NULL).getOne().setName("艾文");
         log.info(pigList.getAll().toString());
     }
 }
