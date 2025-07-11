@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.xuesinuo.pignoo.Pignoo;
 import com.xuesinuo.pignoo.PignooList;
+import com.xuesinuo.pignoo.Pigpen;
 import com.xuesinuo.pignoo.PignooFilter.FMode;
 import com.xuesinuo.pignoo.annotation.Column;
 import com.xuesinuo.pignoo.annotation.PrimaryKey;
@@ -19,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class Test01 {
 
-    private final Pignoo pignoo;
+    private final Pigpen pigpen;
 
     @Table("pig")
     @Data
@@ -34,8 +35,10 @@ public class Test01 {
 
     @PostConstruct
     public void init() {
-        PignooList<Pig> pigList = pignoo.getPignooList(Pig.class);
-        pigList.filter(Pig::getName, FMode.IS_NULL).getOne().setName("艾文");
-        log.info(pigList.getAll().toString());
+        try (Pignoo pignoo = pigpen.build()) {
+            PignooList<Pig> pigList = pignoo.getPignooList(Pig.class);
+            pigList.filter(Pig::getName, FMode.IS_NULL).getOne().setName("艾文");
+            log.info(pigList.getAll().toString());
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.xuesinuo.pignoo;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -41,7 +40,7 @@ public class Pignoo implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         try {
             conn.close();
         } catch (SQLException e) {
