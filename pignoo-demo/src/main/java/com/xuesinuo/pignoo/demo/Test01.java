@@ -1,14 +1,11 @@
 package com.xuesinuo.pignoo.demo;
 
-import java.util.List;
-
 import javax.sql.DataSource;
 
 import org.springframework.stereotype.Component;
 
 import com.xuesinuo.pignoo.Pignoo;
 import com.xuesinuo.pignoo.PignooList;
-import com.xuesinuo.pignoo.Pignoo.DatabaseEngine;
 import com.xuesinuo.pignoo.annotation.Column;
 import com.xuesinuo.pignoo.annotation.PrimaryKey;
 import com.xuesinuo.pignoo.annotation.Table;
@@ -23,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class Test01 {
 
-    private final DataSource dataSource;
+    private final Pignoo pignoo;
 
     @Table("pig")
     @Data
@@ -35,7 +32,6 @@ public class Test01 {
 
     @PostConstruct
     public void init() {
-        Pignoo pignoo = new Pignoo(DatabaseEngine.MySQL, dataSource);
         PignooList<Pig> pigList = pignoo.getPignooList(Pig.class);
         pigList.add(new Pig());
         log.info(pigList.getAll().toString());
