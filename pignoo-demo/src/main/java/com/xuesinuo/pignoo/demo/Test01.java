@@ -1,5 +1,7 @@
 package com.xuesinuo.pignoo.demo;
 
+import java.util.function.Function;
+
 import org.springframework.stereotype.Component;
 
 import com.xuesinuo.pignoo.Pignoo;
@@ -35,10 +37,14 @@ public class Test01 {
 
     @PostConstruct
     public void init() {
-        try (Pignoo pignoo = pigpen.build()) {
+        pigpen.runTransaction(pignoo -> {
+            Pig newPig = new Pig();
+            newPig.setName("戴夫");
             PignooList<Pig> pigList = pignoo.getPignooList(Pig.class);
+            pigList.add(newPig);
             pigList.filter(Pig::getName, FMode.IS_NULL).getOne().setName("艾文");
             log.info(pigList.getAll().toString());
-        }
+            return null;
+        });
     }
 }
