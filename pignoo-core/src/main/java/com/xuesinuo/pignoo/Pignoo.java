@@ -15,7 +15,7 @@ public class Pignoo implements AutoCloseable {
 
     private boolean useJdbcTransaction;
 
-    private boolean connIsAutoCommit = false;
+    private boolean connAutoCommit;
 
     private boolean hasRollbacked = false;
 
@@ -33,11 +33,9 @@ public class Pignoo implements AutoCloseable {
         this.engine = engine;
         try {
             this.conn = dataSource.getConnection();
+            this.connAutoCommit = conn.getAutoCommit();
             if (useJdbcTransaction) {
-                if (conn.getAutoCommit()) {
-                    connIsAutoCommit = true;
-                    conn.setAutoCommit(false);
-                }
+                conn.setAutoCommit(false);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -80,10 +78,8 @@ public class Pignoo implements AutoCloseable {
             }
         }
         try {
-            if (useJdbcTransaction) {
-                if (connIsAutoCommit) {
-                    conn.setAutoCommit(true);
-                }
+            if (connAutoCommit != conn.getAutoCommit()) {
+                conn.setAutoCommit(connAutoCommit);
             }
             conn.close();
         } catch (SQLException e) {
