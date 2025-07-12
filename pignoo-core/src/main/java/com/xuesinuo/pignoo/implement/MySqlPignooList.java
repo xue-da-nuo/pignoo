@@ -54,8 +54,10 @@ public class MySqlPignooList<E> implements PignooList<E> {
 
     @Override
     public PignooList<E> copy() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+        MySqlPignooList<E> pignooList = new MySqlPignooList<>(conn, useJdbcTransaction, c);
+        pignooList.filter = PignooFilter.copy(filter);
+        pignooList.sorter = PignooSorter.copy(sorter);
+        return pignooList;
     }
 
     private static class SqlParam {
@@ -300,5 +302,4 @@ public class MySqlPignooList<E> implements PignooList<E> {
         }
         return sqlExecute.update(conn, sql.toString(), sqlParam.params);
     }
-
 }

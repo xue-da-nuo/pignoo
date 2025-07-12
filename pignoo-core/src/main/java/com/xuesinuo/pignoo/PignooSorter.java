@@ -23,6 +23,16 @@ public class PignooSorter<E> {
 
     private PignooSorter() {}
 
+    public static <E> PignooSorter<E> copy(PignooSorter<E> sorter) {
+        PignooSorter<E> pignooSorter = new PignooSorter<>();
+        pignooSorter.field = sorter.getField();
+        pignooSorter.mode = sorter.getMode();
+        if (sorter.getOtherPignooSorter() != null) {
+            pignooSorter.otherPignooSorter = PignooSorter.copy(sorter.getOtherPignooSorter());
+        }
+        return pignooSorter;
+    }
+
     public static <E> PignooSorter<E> build(Function<E, ?> field, SMode mode) {
         PignooSorter<E> pignooSorter = new PignooSorter<>();
         pignooSorter.field = field;

@@ -50,6 +50,18 @@ public class PignooFilter<E> {
 
     private PignooFilter() {}
 
+    public static <E> PignooFilter<E> copy(PignooFilter<E> filter) {
+        PignooFilter<E> pignooFilter = new PignooFilter<>();
+        pignooFilter.field = filter.getField();
+        pignooFilter.mode = filter.getMode();
+        pignooFilter.values = List.copyOf(filter.getValues());
+        pignooFilter.xor = filter.getXor();
+        if (filter.getOtherPignooFilterList() != null) {
+            pignooFilter.otherPignooFilterList = filter.getOtherPignooFilterList().stream().map(PignooFilter::copy).toList();
+        }
+        return pignooFilter;
+    }
+
     public static <E> PignooFilter<E> build(Function<E, ?> field, FMode mode, Object... values) {
         PignooFilter<E> pignooFilter = new PignooFilter<>();
         pignooFilter.field = field;
