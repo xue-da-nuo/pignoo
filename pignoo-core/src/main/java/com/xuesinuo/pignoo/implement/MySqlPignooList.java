@@ -41,7 +41,7 @@ public class MySqlPignooList<E> implements PignooList<E> {
         this.useJdbcTransaction = useJdbcTransaction;
         this.c = c;
         this.entityMapper = EntityMapper.build(c);
-        this.entityProxyFactory = new EntityProxyFactory<>(c, entityMapper, (index, arg, pig) -> {
+        this.entityProxyFactory = new EntityProxyFactory<>(c, entityMapper, (index, arg, entity) -> {
             if (pignoo.getHasClosed()) {
                 return;
             }
@@ -53,7 +53,7 @@ public class MySqlPignooList<E> implements PignooList<E> {
             sql.append("WHERE ");
             sql.append("`" + entityMapper.primaryKeyColumn() + "` = ? ");
             try {
-                SqlExecuter.update(conn, sql.toString(), Map.of(0, arg, 1, entityMapper.primaryKeyGetter().invoke(pig)));
+                SqlExecuter.update(conn, sql.toString(), Map.of(0, arg, 1, entityMapper.primaryKeyGetter().invoke(entity)));
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }

@@ -18,7 +18,7 @@ public class EntityProxyFactory<E> {
 
     @FunctionalInterface
     public static interface Updater {
-        void run(int index, Object setterArg, Object pig);
+        void run(int index, Object setterArg, Object obj);
     }
 
     public EntityProxyFactory(Class<E> c, EntityMapper<E> mapper, Updater updater) {

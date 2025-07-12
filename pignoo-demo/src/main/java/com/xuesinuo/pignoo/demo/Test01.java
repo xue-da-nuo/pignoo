@@ -35,9 +35,9 @@ public class Test01 {
     @PostConstruct
     public void init() {
         gru.runTransaction(pignoo -> {
+            PignooList<Pig> pigList = pignoo.getPignooList(Pig.class);
             Pig newPig = new Pig();
             newPig.setName("戴夫");
-            PignooList<Pig> pigList = pignoo.getPignooList(Pig.class);
             pigList.add(newPig);
             pigList.filter(Pig::getName, FMode.IS_NULL).getOne().setName("艾文");
             log.info(pigList.getAll().toString());

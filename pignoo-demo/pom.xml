@@ -8,22 +8,31 @@
   <description>pignoo is a simple jdbc tool.</description>
 
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.3</version>
-    <relativePath/>
+    <groupId>com.xuesinuo</groupId>
+    <artifactId>pignoo</artifactId>
+    <version>0.1.0</version>
   </parent>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>3.5.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>com.xuesinuo</groupId>
       <artifactId>pignoo-core</artifactId>
-      <version>0.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.xuesinuo</groupId>
       <artifactId>pignoo-spring</artifactId>
-      <version>0.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.mysql</groupId>
@@ -41,6 +50,20 @@
   </dependencies>
 
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>3.5.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
