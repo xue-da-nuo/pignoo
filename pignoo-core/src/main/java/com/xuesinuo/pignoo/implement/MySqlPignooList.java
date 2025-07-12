@@ -191,7 +191,8 @@ public class MySqlPignooList<E> implements PignooList<E> {
             sql.append("WHERE ");
             sql.append(filter2Sql(filter, sqlParam));
         }
-        return sqlExecute.selectCount(conn, sql.toString(), sqlParam.params, entityMapper);
+        Long size = sqlExecute.selectColumn(conn, sql.toString(), sqlParam.params, Long.class);
+        return size == null ? 0L : size;
     }
 
     @Override
@@ -267,7 +268,7 @@ public class MySqlPignooList<E> implements PignooList<E> {
         sql.append("(" + params.keySet().stream().map(column -> "`" + column + "`").collect(Collectors.joining(",")) + ") ");
         sql.append("VALUES ");
         sql.append("(" + params.values().stream().map(value -> sqlParam.next(value)).collect(Collectors.joining(",")) + ") ");
-        Object primaryKeyValue = sqlExecute.insert(conn, sql.toString(), sqlParam.params, c, entityMapper);
+        Object primaryKeyValue = sqlExecute.insert(conn, sql.toString(), sqlParam.params, c);
 
         StringBuilder sql2 = new StringBuilder("");
         SqlParam sqlParam2 = new SqlParam();
@@ -447,5 +448,31 @@ public class MySqlPignooList<E> implements PignooList<E> {
             sql.append(filter2Sql(filter, sqlParam));
         }
         return sqlExecute.update(conn, sql.toString(), sqlParam.params);
+    }
+
+    @Override
+    public <R> R sum(Function<E, R> field, Class<R> c) {
+        StringBuilder sql = new StringBuilder("");
+        SqlParam sqlParam = new SqlParam();
+        sql.append("SELECT SUM(`" + entityMapper.getColumnByFunction(field) + "`) ");
+        sql.append("FROM `" + entityMapper.tableName() + "` ");
+        if (filter != null) {
+            sql.append("WHERE ");
+            sql.append(filter2Sql(filter, sqlParam));
+        }
+        return sqlExecute.selectColumn(conn, sql.toString(), sqlParam.params, c);
+    }
+
+    @Override
+    public <R> R avg(Function<E, R> field, Class<R> c) {
+        StringBuilder sql = new StringBuilder("");
+        SqlParam sqlParam = new SqlParam();
+        sql.append("SELECT AVG(`" + entityMapper.getColumnByFunction(field) + "`) ");
+        sql.append("FROM `" + entityMapper.tableName() + "` ");
+        if (filter != null) {
+            sql.append("WHERE ");
+            sql.append(filter2Sql(filter, sqlParam));
+        }
+        return sqlExecute.selectColumn(conn, sql.toString(), sqlParam.params, c);
     }
 }

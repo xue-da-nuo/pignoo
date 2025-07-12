@@ -63,4 +63,10 @@ public interface PignooList<E> {
 
     /** 删除数据 */
     long remove();
+
+    /** 求和 */
+    <R> R sum(Function<E, R> field, Class<R> c);
+
+    /** 求平均 */
+    <R> R avg(Function<E, R> field, Class<R> c);
 }

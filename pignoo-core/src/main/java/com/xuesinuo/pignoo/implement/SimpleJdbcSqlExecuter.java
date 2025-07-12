@@ -76,7 +76,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
     }
 
     @Override
-    public <E> long selectCount(Connection conn, String sql, Map<Integer, Object> params, EntityMapper<E> entityMapper) {
+    public <R> R selectColumn(Connection conn, String sql, Map<Integer, Object> params, Class<R> c) {
         System.out.println(sql);
         System.out.println(params);
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -85,7 +85,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    return rs.getLong(1);
+                    return rs.getObject(0, c);
                 }
             }
         } catch (Exception e) {
@@ -97,11 +97,11 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
             throw ex;
         }
-        return 0L;
+        return null;
     }
 
     @Override
-    public <E> Object insert(Connection conn, String sql, Map<Integer, Object> params, Class<E> c, EntityMapper<E> mapper) {
+    public <R> Object insert(Connection conn, String sql, Map<Integer, Object> params, Class<R> c) {
         System.out.println(sql);
         System.out.println(params);
         Object primaryKeyValue = null;

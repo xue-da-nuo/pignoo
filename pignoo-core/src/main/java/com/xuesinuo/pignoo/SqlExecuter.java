@@ -12,9 +12,9 @@ public interface SqlExecuter {
 
     <E> List<E> selectList(Connection conn, String sql, Map<Integer, Object> params, Class<E> c, EntityMapper<E> mapper);
 
-    <E> long selectCount(Connection conn, String sql, Map<Integer, Object> params, EntityMapper<E> entityMapper);
+    <R> R selectColumn(Connection conn, String sql, Map<Integer, Object> params, Class<R> c);
 
-    <E> Object insert(Connection conn, String sql, Map<Integer, Object> params, Class<E> c, EntityMapper<E> mapper);
+    <R> Object insert(Connection conn, String sql, Map<Integer, Object> params, Class<R> c);
 
     long update(Connection conn, String sql, Map<Integer, Object> params);
 }
