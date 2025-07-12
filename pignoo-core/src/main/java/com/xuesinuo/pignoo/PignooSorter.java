@@ -6,15 +6,8 @@ import lombok.Getter;
 
 @Getter
 public class PignooSorter<E> {
-    @Getter
     public static enum SMode {
-        MIN_FIRST("ASC"), MAX_FIRST("DESC");
-
-        private String sql;
-
-        SMode(String sql) {
-            this.sql = sql;
-        }
+        MIN_FIRST, MAX_FIRST;
     }
 
     private Function<E, ?> field;

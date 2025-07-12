@@ -9,37 +9,23 @@ import lombok.Getter;
 
 @Getter
 public class PignooFilter<E> {
-    @Getter
     public static enum FMode {
-        EQ("="),
-        NOT_EQ("!="),
-        GT(">"),
-        LT("<"),
-        GE(">="),
-        LE("<="),
-        LIKE("LIKE"),
-        NOT_LIKE("NOT LIKE"),
-        IN("IN"),
-        NOT_IN("NOT IN"),
-        IS_NULL("IS NULL"),
-        IS_NOT_NULL("IS NOT NULL");
-
-        private String sql;
-
-        FMode(String sql) {
-            this.sql = sql;
-        }
+        EQ,
+        NOT_EQ,
+        GT,
+        LT,
+        GE,
+        LE,
+        LIKE,
+        NOT_LIKE,
+        IN,
+        NOT_IN,
+        IS_NULL,
+        IS_NOT_NULL;
     }
 
-    @Getter
     public enum XOR {
-        AND("AND"), OR("OR");
-
-        private String sql;
-
-        XOR(String sql) {
-            this.sql = sql;
-        }
+        AND, OR;
     }
 
     private Function<E, ?> field;

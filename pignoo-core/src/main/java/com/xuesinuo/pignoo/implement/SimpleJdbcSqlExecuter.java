@@ -12,10 +12,19 @@ import com.xuesinuo.pignoo.entity.EntityMapper;
 
 public class SimpleJdbcSqlExecuter implements SqlExecuter {
 
+    private SimpleJdbcSqlExecuter() {}
+
+    private static final SimpleJdbcSqlExecuter instance = new SimpleJdbcSqlExecuter();
+
+    public static SimpleJdbcSqlExecuter getInstance() {
+        return instance;
+    }
+
     @Override
-    public <E> E selectOne(Connection conn, String sql, Map<Integer, Object> params, Class<E> c, EntityMapper<E> mapper) {
+    public <E> E selectOne(Connection conn, String sql, Map<Integer, Object> params, Class<E> c) {
         System.out.println(sql);
         System.out.println(params);
+        EntityMapper<E> mapper = EntityMapper.build(c);
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (Map.Entry<Integer, Object> entry : params.entrySet()) {
                 ps.setObject(entry.getKey() + 1, entry.getValue());
@@ -44,9 +53,10 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
     }
 
     @Override
-    public <E> List<E> selectList(Connection conn, String sql, Map<Integer, Object> params, Class<E> c, EntityMapper<E> mapper) {
+    public <E> List<E> selectList(Connection conn, String sql, Map<Integer, Object> params, Class<E> c) {
         System.out.println(sql);
         System.out.println(params);
+        EntityMapper<E> mapper = EntityMapper.build(c);
         ArrayList<E> list = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (Map.Entry<Integer, Object> entry : params.entrySet()) {
