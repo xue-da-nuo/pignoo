@@ -1,4 +1,4 @@
-package com.xuesinuo.pignoo.demo;
+package com.xuesinuo.pignoo.demo.core.config;
 
 import javax.sql.DataSource;
 
@@ -9,7 +9,7 @@ import com.xuesinuo.pignoo.core.Gru;
 import com.xuesinuo.pignoo.core.Pignoo.DatabaseEngine;
 
 @Configuration
-public class PignooConfig {
+public class Config {
     @Bean
     Gru gru(DataSource dataSource) {
         return new Gru(DatabaseEngine.MySQL, dataSource);

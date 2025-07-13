@@ -34,17 +34,17 @@ public class MySqlPignooList<E> implements PignooList<E> {
 
     private final Pignoo pignoo;
     private final Connection conn;
-    private final boolean useJdbcTransaction;
+    private final boolean inTransaction;
     private final Class<E> c;
     private final EntityMapper<E> entityMapper;
     private PignooFilter<E> filter;
     private PignooSorter<E> sorter;
     private final EntityProxyFactory<E> entityProxyFactory;
 
-    public MySqlPignooList(Pignoo pignoo, Connection conn, boolean useJdbcTransaction, Class<E> c) {
+    public MySqlPignooList(Pignoo pignoo, Connection conn, boolean inTransaction, Class<E> c) {
         this.pignoo = pignoo;
         this.conn = conn;
-        this.useJdbcTransaction = useJdbcTransaction;
+        this.inTransaction = inTransaction;
         this.c = c;
         this.entityMapper = EntityMapper.build(c);
         this.entityProxyFactory = new EntityProxyFactory<>(c, entityMapper, (index, arg, entity) -> {
@@ -68,7 +68,7 @@ public class MySqlPignooList<E> implements PignooList<E> {
 
     @Override
     public PignooList<E> copy() {
-        MySqlPignooList<E> pignooList = new MySqlPignooList<>(pignoo, conn, useJdbcTransaction, c);
+        MySqlPignooList<E> pignooList = new MySqlPignooList<>(pignoo, conn, inTransaction, c);
         pignooList.filter = PignooFilter.copy(filter);
         pignooList.sorter = PignooSorter.copy(sorter);
         return pignooList;
@@ -195,7 +195,7 @@ public class MySqlPignooList<E> implements PignooList<E> {
             sql.append("ORDER BY ");
             sql.append(sorter2Sql(sorter));
         }
-        if (useJdbcTransaction) {
+        if (inTransaction) {
             sql.append("FOR UPDATE ");
         }
         E e = SqlExecuter.selectOne(conn, sql.toString(), sqlParam.params, c);
@@ -218,7 +218,7 @@ public class MySqlPignooList<E> implements PignooList<E> {
             sql.append("ORDER BY ");
             sql.append(sorter2Sql(sorter));
         }
-        if (useJdbcTransaction) {
+        if (inTransaction) {
             sql.append("FOR UPDATE ");
         }
         List<E> eList = SqlExecuter.selectList(conn, sql.toString(), sqlParam.params, c);
@@ -242,7 +242,7 @@ public class MySqlPignooList<E> implements PignooList<E> {
             sql.append(sorter2Sql(sorter));
         }
         sql.append("LIMIT " + offset + "," + limit + " ");
-        if (useJdbcTransaction) {
+        if (inTransaction) {
             sql.append("FOR UPDATE ");
         }
         List<E> eList = SqlExecuter.selectList(conn, sql.toString(), sqlParam.params, c);

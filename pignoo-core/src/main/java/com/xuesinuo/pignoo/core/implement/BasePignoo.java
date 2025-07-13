@@ -16,23 +16,23 @@ import com.xuesinuo.pignoo.core.PignooList;
  */
 public class BasePignoo implements Pignoo {
 
-    private DatabaseEngine engine;
+    private final DatabaseEngine engine;// 数据库引擎
 
-    private Connection conn;
+    private final Connection conn;// 数据库连接
 
-    private boolean useJdbcTransaction;
+    private final boolean useJdbcTransaction;// 是否使用JDBC事务
 
-    private boolean connAutoCommit;
+    private final boolean connAutoCommit;// 原本的conn是否自动提交
 
-    private boolean hasRollbacked = false;
+    private boolean hasRollbacked = false;// 是否已经回滚
 
-    private boolean hasClosed = false;
+    private boolean hasClosed = false;// 是否已经关闭
 
     /**
      *
-     * @param engine             数据库引擎
+     * @param engine             数据库引擎，如果为NULL，将读取数据库配置，建议传入减少数据库访问
      *                           <p>
-     *                           Database engine
+     *                           Database engine, if NULL, read the database configuration, it is recommended to pass in to reduce database access
      * @param dataSource         数据源
      *                           <p>
      *                           Data source
@@ -41,15 +41,18 @@ public class BasePignoo implements Pignoo {
      *                           Whether to use JDBC transaction
      */
     public BasePignoo(DatabaseEngine engine, DataSource dataSource, boolean useJdbcTransaction) {
-        if (engine == null) {
-            throw new RuntimeException("Unknow database engine");
-        }
         if (dataSource == null) {
             throw new RuntimeException("Unknow dataSource");
         }
-        this.engine = engine;
         try {
             this.conn = dataSource.getConnection();
+            if (engine == null) {
+                engine = DatabaseEngine.getDatabaseEngineByConnection(this.conn);
+            }
+            if (engine == null) {
+                throw new RuntimeException("Unknow database engine");
+            }
+            this.engine = engine;
             this.connAutoCommit = conn.getAutoCommit();
             if (useJdbcTransaction) {
                 conn.setAutoCommit(false);

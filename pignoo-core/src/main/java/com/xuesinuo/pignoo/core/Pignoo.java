@@ -1,5 +1,11 @@
 package com.xuesinuo.pignoo.core;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * Pignoo - 小黄人语的“无聊”。《卑鄙的我3》中小黄人们高呼“Pignoo”抗议格活过于无聊
  * <p>
@@ -17,13 +23,14 @@ package com.xuesinuo.pignoo.core;
  * <p>
  * If you use Pignoo to manage the commit, rollback, close or return the connection, please use {@link Gru} to build Pignoo instances
  * <p>
- * 也可以使用外部框架管理事务，这时构建Pignoo需传入一个有完善事务管理机制的DataSource实例
- * <p>
- * You can also use an external framework to manage transactions, at this time, you need to pass in a DataSource instance with a complete transaction management mechanism
- * <p>
  * Pignoo是一个需要关闭的({@link AutoCloseable})，在关闭Pignoo时执行的是JDBC事务的提交或回滚
  * <p>
  * Pignoo is a need to close ({@link AutoCloseable}), and when closing Pignoo, the execution is the commit or rollback of the JDBC transaction
+ * <p>
+ * 如果使用例如Spring + Pignoo的其他方式构建，则可能不需要关闭Pignoo，关闭连接、提交事务等操作都交给外部框架管理了
+ * <p>
+ * If you use other ways such as Spring + Pignoo to build, you may not need to close Pignoo, and the operations such as closing the connection, committing the transaction, etc. are managed by the
+ * external framework
  * 
  * @author xuesinuo
  * @since 0.1.0
@@ -35,8 +42,46 @@ public interface Pignoo extends AutoCloseable {
      * <p>
      * Database engine
      */
+    @AllArgsConstructor
+    @Getter
     public static enum DatabaseEngine {
-        MySQL
+        MySQL("mysql");
+
+        /**
+         * 数据库引擎名称，全小写
+         * <p>
+         * Database engine name, all lowercase
+         */
+        private String name;
+
+        /**
+         * 根据名称获取数据库引擎
+         * <p>
+         * Get database engine by name
+         */
+        public static DatabaseEngine getDatabaseEngineByName(String name) {
+            if (name == null || name.isEmpty()) {
+                return null;
+            }
+            for (DatabaseEngine engine : DatabaseEngine.values()) {
+                if (name.toLowerCase().contains(engine.getName())) {
+                    return engine;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * 根据数据库连接获取数据库引擎
+         * <p>
+         * Get database engine by connection
+         */
+        public static DatabaseEngine getDatabaseEngineByConnection(Connection conn) throws SQLException {
+            if (conn == null || conn.getMetaData() == null) {
+                return null;
+            }
+            return getDatabaseEngineByName(conn.getMetaData().getDatabaseProductName());
+        }
     }
 
     /**

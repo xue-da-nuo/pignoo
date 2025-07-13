@@ -1,5 +1,7 @@
 package com.xuesinuo.pignoo.core;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.function.Function;
 
 import javax.sql.DataSource;
@@ -24,19 +26,30 @@ import com.xuesinuo.pignoo.core.implement.BasePignoo;
  * @since 0.1.0
  */
 public class Gru {
-    private final DatabaseEngine engine;
-    private final DataSource dataSource;
+    private final DatabaseEngine engine;// 数据库引擎
+    private final DataSource dataSource;// 数据源
 
     /**
      * 
-     * @param engine     数据库引擎
+     * @param engine     数据库引擎，如果为NULL，将读取数据库配置，建议传入减少数据库访问
      *                   <p>
-     *                   Database engine
+     *                   Database engine, if NULL, read the database configuration, it is recommended to pass in to reduce database access
      * @param dataSource 数据源
      *                   <p>
      *                   Data source
      */
     public Gru(DatabaseEngine engine, DataSource dataSource) {
+        if (engine == null) {
+            try (Connection conn = dataSource.getConnection()) {
+                engine = DatabaseEngine.getDatabaseEngineByConnection(conn);
+                conn.commit();
+            } catch (SQLException e) {
+                throw new RuntimeException("Read database engine failed", e);
+            }
+        }
+        if (engine == null) {
+            throw new RuntimeException("Unknow database engine");
+        }
         this.engine = engine;
         this.dataSource = dataSource;
     }
