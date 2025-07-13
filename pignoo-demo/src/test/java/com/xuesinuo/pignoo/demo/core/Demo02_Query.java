@@ -43,6 +43,9 @@ public class Demo02_Query {
     @Test
     public void multiFilter() {
         var pigList = pignoo.getPignooList(Pig.class);
-        pigList.filter(PignooFilter.build(Pig::getWeight, FMode.GT, 10).or(PignooFilter.build(Pig::getWeight, FMode.LT, 2)));
+        pigList.filter(Pig::getColor, FMode.LIKE, "%白%");
+        pigList.filter(f -> f.and(Pig::getWeight, FMode.GT, 10)
+                .or(Pig::getWeight, FMode.LT, 2));
+        pigList.getOne();
     }
 }

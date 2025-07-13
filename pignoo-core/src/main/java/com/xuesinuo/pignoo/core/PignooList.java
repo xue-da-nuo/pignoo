@@ -157,6 +157,20 @@ public interface PignooList<E> {
     PignooList<E> filter(PignooFilter<E> filter);
 
     /**
+     * 过滤
+     * <p>
+     * Filter
+     * 
+     * @param filterBuilder 过滤器
+     *                      <p>
+     *                      Filter
+     * @return 过滤后的List
+     *         <p>
+     *         The filtered list
+     */
+    PignooList<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder);
+
+    /**
      * 新增一条数据
      * <p>
      * Add a data

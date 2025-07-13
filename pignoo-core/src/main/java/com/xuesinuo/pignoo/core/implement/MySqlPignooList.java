@@ -115,17 +115,6 @@ public class MySqlPignooList<E> implements PignooList<E> {
         }
     }
 
-    private String xorToSql(XOR xor) {
-        switch (xor) {
-        case AND:
-            return "AND";
-        case OR:
-            return "OR";
-        default:
-            return "";
-        }
-    }
-
     private String smodeToSql(SMode smode) {
         switch (smode) {
         case MIN_FIRST:
@@ -140,16 +129,22 @@ public class MySqlPignooList<E> implements PignooList<E> {
     private String filter2Sql(PignooFilter<E> filter, SqlParam sqlParam) {
         String sql = "";
         if (filter != null) {
-            if (filter.getXor() != null && filter.getOtherPignooFilterList() != null) {
-                List<String> sqlStream = filter.getOtherPignooFilterList().stream().map(f -> filter2Sql(f, sqlParam)).toList();
-                sql += thisFilter2Sql(sql, filter, sqlParam);
-                List<String> sqlList = Stream.concat(sqlStream.stream(), Stream.of(sql)).toList();
-                sql = sqlList.stream().filter(s -> s != null && !s.isBlank()).collect(Collectors.joining(xorToSql(filter.getXor()) + " "));
-                if (filter.getXor() == XOR.OR) {
-                    sql = "(" + sql + ")";
-                }
+            if (filter.getXor() != null && filter.getXor() == XOR.OR) {
+                sql += "(" + filter.getOtherPignooFilterList().stream().map(f -> filter2Sql(f, sqlParam))
+                        .filter(s -> s != null && !s.isBlank()).collect(Collectors.joining("OR ")) + ") ";
             } else {
-                sql += thisFilter2Sql(sql, filter, sqlParam);
+                boolean first = true;
+                if (filter.getField() != null) {
+                    sql += thisFilter2Sql(sql, filter, sqlParam);
+                    first = false;
+                }
+                for (PignooFilter<E> childFilter : filter.getOtherPignooFilterList()) {
+                    String appedSql = filter2Sql(childFilter, sqlParam);
+                    if (appedSql != null && !appedSql.isBlank()) {
+                        sql += (first ? "" : "AND ") + appedSql + " ";
+                        first = false;
+                    }
+                }
             }
         }
         return sql;
@@ -300,6 +295,17 @@ public class MySqlPignooList<E> implements PignooList<E> {
         } else {
             this.filter = this.filter.and(filter);
         }
+        return this;
+    }
+
+    @Override
+    public PignooList<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder) {
+        PignooFilter<E> filter = new PignooFilter<>();
+        filter = filterBuilder.apply(filter);
+        if (filter == null) {
+            return this;
+        }
+        this.filter(filter);
         return this;
     }
 
