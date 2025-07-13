@@ -1,4 +1,4 @@
-package com.xuesinuo.pignoo;
+package com.xuesinuo.pignoo.core;
 
 /**
  * Pignoo - 小黄人语的“无聊”。《卑鄙的我3》中小黄人们高呼“Pignoo”抗议格活过于无聊

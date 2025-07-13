@@ -6,3 +6,6 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/pignoo?serverTimezone=Asia%2FShanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
     username: root
     password: root
+logging:
+  level:
+    '[com.xuesinuo.pignoo]': debug

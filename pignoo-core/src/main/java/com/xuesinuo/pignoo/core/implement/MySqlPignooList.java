@@ -1,10 +1,9 @@
 
-package com.xuesinuo.pignoo.implement;
+package com.xuesinuo.pignoo.core.implement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,16 +11,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.xuesinuo.pignoo.Pignoo;
-import com.xuesinuo.pignoo.PignooFilter;
-import com.xuesinuo.pignoo.PignooList;
-import com.xuesinuo.pignoo.PignooSorter;
-import com.xuesinuo.pignoo.SqlExecuter;
-import com.xuesinuo.pignoo.PignooFilter.FMode;
-import com.xuesinuo.pignoo.PignooFilter.XOR;
-import com.xuesinuo.pignoo.PignooSorter.SMode;
-import com.xuesinuo.pignoo.entity.EntityMapper;
-import com.xuesinuo.pignoo.entity.EntityProxyFactory;
+import com.xuesinuo.pignoo.core.Pignoo;
+import com.xuesinuo.pignoo.core.PignooFilter;
+import com.xuesinuo.pignoo.core.PignooList;
+import com.xuesinuo.pignoo.core.PignooSorter;
+import com.xuesinuo.pignoo.core.SqlExecuter;
+import com.xuesinuo.pignoo.core.PignooFilter.FMode;
+import com.xuesinuo.pignoo.core.PignooFilter.XOR;
+import com.xuesinuo.pignoo.core.PignooSorter.SMode;
+import com.xuesinuo.pignoo.core.entity.EntityMapper;
+import com.xuesinuo.pignoo.core.entity.EntityProxyFactory;
 
 /**
  * 基于MySQL语法实现的{@link PignooList}

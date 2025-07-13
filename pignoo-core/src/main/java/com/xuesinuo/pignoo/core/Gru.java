@@ -1,11 +1,11 @@
-package com.xuesinuo.pignoo;
+package com.xuesinuo.pignoo.core;
 
 import java.util.function.Function;
 
 import javax.sql.DataSource;
 
-import com.xuesinuo.pignoo.Pignoo.DatabaseEngine;
-import com.xuesinuo.pignoo.implement.BasePignoo;
+import com.xuesinuo.pignoo.core.Pignoo.DatabaseEngine;
+import com.xuesinuo.pignoo.core.implement.BasePignoo;
 
 /**
  * 格鲁（Gru） - 小黄人的主人

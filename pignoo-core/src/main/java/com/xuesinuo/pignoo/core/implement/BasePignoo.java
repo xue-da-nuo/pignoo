@@ -1,12 +1,12 @@
-package com.xuesinuo.pignoo.implement;
+package com.xuesinuo.pignoo.core.implement;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import com.xuesinuo.pignoo.Pignoo;
-import com.xuesinuo.pignoo.PignooList;
+import com.xuesinuo.pignoo.core.Pignoo;
+import com.xuesinuo.pignoo.core.PignooList;
 
 /**
  * 基础的Pignoo实现

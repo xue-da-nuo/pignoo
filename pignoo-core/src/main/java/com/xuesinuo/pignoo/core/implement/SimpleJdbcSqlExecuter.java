@@ -1,4 +1,4 @@
-package com.xuesinuo.pignoo.implement;
+package com.xuesinuo.pignoo.core.implement;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.xuesinuo.pignoo.SqlExecuter;
-import com.xuesinuo.pignoo.entity.EntityMapper;
+import com.xuesinuo.pignoo.core.SqlExecuter;
+import com.xuesinuo.pignoo.core.entity.EntityMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 原生JDBC的{@SqlExecuter}实现
@@ -16,6 +18,7 @@ import com.xuesinuo.pignoo.entity.EntityMapper;
  * @author xuesinuo
  * @since 0.1.0
  */
+@Slf4j
 public class SimpleJdbcSqlExecuter implements SqlExecuter {
 
     private SimpleJdbcSqlExecuter() {}
@@ -28,8 +31,8 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
 
     @Override
     public <E> E selectOne(Connection conn, String sql, Map<Integer, Object> params, Class<E> c) {
-        System.out.println(sql);
-        System.out.println(params);
+        log.debug(sql);
+        log.debug(params.toString());
         EntityMapper<E> mapper = EntityMapper.build(c);
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (Map.Entry<Integer, Object> entry : params.entrySet()) {
@@ -60,8 +63,8 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
 
     @Override
     public <E> List<E> selectList(Connection conn, String sql, Map<Integer, Object> params, Class<E> c) {
-        System.out.println(sql);
-        System.out.println(params);
+        log.debug(sql);
+        log.debug(params.toString());
         EntityMapper<E> mapper = EntityMapper.build(c);
         ArrayList<E> list = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -93,8 +96,8 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
 
     @Override
     public <R> R selectColumn(Connection conn, String sql, Map<Integer, Object> params, Class<R> c) {
-        System.out.println(sql);
-        System.out.println(params);
+        log.debug(sql);
+        log.debug(params.toString());
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (Map.Entry<Integer, Object> entry : params.entrySet()) {
                 ps.setObject(entry.getKey() + 1, entry.getValue());
@@ -118,8 +121,8 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
 
     @Override
     public <R> Object insert(Connection conn, String sql, Map<Integer, Object> params, Class<R> c) {
-        System.out.println(sql);
-        System.out.println(params);
+        log.debug(sql);
+        log.debug(params.toString());
         Object primaryKeyValue = null;
         try (PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (Map.Entry<Integer, Object> entry : params.entrySet()) {
@@ -147,8 +150,8 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
 
     @Override
     public long update(Connection conn, String sql, Map<Integer, Object> params) {
-        System.out.println(sql);
-        System.out.println(params);
+        log.debug(sql);
+        log.debug(params.toString());
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (Map.Entry<Integer, Object> entry : params.entrySet()) {
                 ps.setObject(entry.getKey() + 1, entry.getValue());

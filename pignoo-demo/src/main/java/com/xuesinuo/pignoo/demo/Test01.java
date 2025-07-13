@@ -1,15 +1,12 @@
 package com.xuesinuo.pignoo.demo;
 
-import java.util.Random;
-
 import org.springframework.stereotype.Component;
 
-import com.xuesinuo.pignoo.PignooList;
-import com.xuesinuo.pignoo.Gru;
-import com.xuesinuo.pignoo.PignooFilter.FMode;
-import com.xuesinuo.pignoo.annotation.Column;
-import com.xuesinuo.pignoo.annotation.PrimaryKey;
-import com.xuesinuo.pignoo.annotation.Table;
+import com.xuesinuo.pignoo.core.Gru;
+import com.xuesinuo.pignoo.core.PignooFilter.FMode;
+import com.xuesinuo.pignoo.core.annotation.Column;
+import com.xuesinuo.pignoo.core.annotation.PrimaryKey;
+import com.xuesinuo.pignoo.core.annotation.Table;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Data;

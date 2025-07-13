@@ -1,4 +1,4 @@
-package com.xuesinuo.pignoo;
+package com.xuesinuo.pignoo.core;
 
 import java.sql.Connection;
 import java.util.List;

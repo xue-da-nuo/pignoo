@@ -1,6 +1,5 @@
-package com.xuesinuo.pignoo;
+package com.xuesinuo.pignoo.core;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 

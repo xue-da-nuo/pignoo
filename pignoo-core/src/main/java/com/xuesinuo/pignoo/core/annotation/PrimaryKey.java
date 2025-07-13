@@ -1,4 +1,4 @@
-package com.xuesinuo.pignoo.annotation;
+package com.xuesinuo.pignoo.core.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -7,9 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 标记属性，映射到数据库列
+ * 标记一个属性，作为数据库主键
  * <p>
- * Mark a entity field , mapping to a column in database
+ * Mark a entity field , as a primary key in database
  * 
  * @author xuesinuo
  * @since 0.1.0
@@ -17,11 +17,11 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })
-public @interface Column {
+public @interface PrimaryKey {
     /**
-     * @return 数据库列名
+     * @return 是否自动生成
      *         <p>
-     *         Database column name
+     *         Whether to automatically generate
      */
-    String value();
+    boolean auto();
 }

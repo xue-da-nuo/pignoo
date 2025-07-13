@@ -1,4 +1,4 @@
-package com.xuesinuo.pignoo.entity;
+package com.xuesinuo.pignoo.core.entity;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -6,9 +6,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.xuesinuo.pignoo.annotation.Column;
-import com.xuesinuo.pignoo.annotation.PrimaryKey;
-import com.xuesinuo.pignoo.annotation.Table;
+import com.xuesinuo.pignoo.core.annotation.Column;
+import com.xuesinuo.pignoo.core.annotation.PrimaryKey;
+import com.xuesinuo.pignoo.core.annotation.Table;
 
 /**
  * 解析实体类

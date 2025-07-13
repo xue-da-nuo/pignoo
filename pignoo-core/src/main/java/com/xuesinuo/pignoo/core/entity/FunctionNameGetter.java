@@ -1,4 +1,4 @@
-package com.xuesinuo.pignoo.entity;
+package com.xuesinuo.pignoo.core.entity;
 
 import java.lang.reflect.Method;
 import java.util.function.Function;
