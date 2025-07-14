@@ -1,7 +1,6 @@
 package com.xuesinuo.pignoo.demo.core;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -10,10 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.xuesinuo.pignoo.core.Pignoo;
-import com.xuesinuo.pignoo.core.PignooFilter;
 import com.xuesinuo.pignoo.core.Pignoo.DatabaseEngine;
 import com.xuesinuo.pignoo.core.PignooFilter.FMode;
-import com.xuesinuo.pignoo.core.PignooSorter.SMode;
 import com.xuesinuo.pignoo.core.implement.BasePignoo;
 import com.xuesinuo.pignoo.demo.table.Pig;
 
