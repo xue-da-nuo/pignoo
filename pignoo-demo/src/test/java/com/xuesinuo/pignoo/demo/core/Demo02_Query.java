@@ -1,8 +1,6 @@
 package com.xuesinuo.pignoo.demo.core;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -42,7 +40,7 @@ public class Demo02_Query {
     @Test
     public void multiFilter() {
         var pigList = pignoo.getPignooList(Pig.class);
-        pigList.filter(Pig::getColor, "like", "%白%");
+        pigList.filter(Pig::getColor, "in", null, "%黑%");
         pigList.filter(f -> f.or(Pig::getWeight, ">", 10).or(Pig::getWeight, "<", 2));
         pigList.sort(Pig::getAge, SMode.MAX_FIRST);
         pigList.sort(Pig::getWeight, SMode.MIN_FIRST);

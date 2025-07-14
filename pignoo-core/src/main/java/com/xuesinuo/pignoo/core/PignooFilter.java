@@ -29,73 +29,61 @@ public class PignooFilter<E> {
          * <p>
          * Equals
          */
-        EQ("="),
+        EQ("==", 1, 1),
         /**
          * 不等于
          * <p>
          * Not equals
          */
-        NOT_EQ("!="),
+        NOT_EQ("!=", 1, 1),
         /**
          * 大于
          * <p>
          * Greater than
          */
-        GT(">"),
+        GT(">", 1, 1),
         /**
          * 小于
          * <p>
          * Less than
          */
-        LT("<"),
+        LT("<", 1, 1),
         /**
          * 大于等于
          * <p>
          * Greater than or equal to
          */
-        GE(">="),
+        GE(">=", 1, 1),
         /**
          * 小于等于
          * <p>
          * Less than or equal to
          */
-        LE("<="),
+        LE("<=", 1, 1),
         /**
          * 模糊查询
          * <p>
          * Fuzzy query
          */
-        LIKE("like"),
+        LIKE("like", 1, 1),
         /**
          * 模糊查询，反查询
          * <p>
          * Fuzzy query, reverse query
          */
-        NOT_LIKE("not like"),
+        NOT_LIKE("not like", 1, 1),
         /**
          * 包含
          * <p>
          * Contains
          */
-        IN("in"),
+        IN("in", 1, Integer.MAX_VALUE),
         /**
          * 不包含
          * <p>
          * Not contains
          */
-        NOT_IN("not in"),
-        /**
-         * 为空
-         * <p>
-         * Is null
-         */
-        IS_NULL("is null"),
-        /**
-         * 不为空
-         * <p>
-         * Is not null
-         */
-        IS_NOT_NULL("is not null");
+        NOT_IN("not in", 1, Integer.MAX_VALUE);
 
         /**
          * 筛选条件名称，可以用于代替枚举值，不区分大小写
@@ -103,6 +91,20 @@ public class PignooFilter<E> {
          * Filter condition name, can be used to replace enum values, case-insensitive
          */
         private String name;
+
+        /**
+         * 筛选条件允许的参数最少个数
+         * <p>
+         * The minimum number of parameters allowed by the filter condition
+         */
+        private int minCount;
+
+        /**
+         * 筛选条件允许的参数最多个数
+         * <p>
+         * The maximum number of parameters allowed by the filter condition
+         */
+        private int maxCount;
 
         /**
          * 名称映射成筛选条件枚举
@@ -114,15 +116,18 @@ public class PignooFilter<E> {
          */
         public static FMode getFMode(String name) {
             if (name == null) {
-                throw new IllegalArgumentException("Invalid FMode: null");
+                throw new RuntimeException("Invalid FMode: null");
             }
             name = name.trim().toLowerCase();
+            if (name.equals("=")) {
+                return EQ;
+            }
             for (FMode fMode : values()) {
                 if (fMode.getName().equalsIgnoreCase(name)) {
                     return fMode;
                 }
             }
-            throw new IllegalArgumentException("Invalid FMode: " + name);
+            throw new RuntimeException("Invalid FMode: " + name);
         }
     }
 

@@ -4,6 +4,7 @@ package com.xuesinuo.pignoo.core.implement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,10 +106,6 @@ public class MySqlPignooList<E> implements PignooList<E> {
             return "IN";
         case NOT_IN:
             return "NOT IN";
-        case IS_NULL:
-            return "IS NULL";
-        case IS_NOT_NULL:
-            return "IS NOT NULL";
         default:
             return "";
         }
@@ -150,15 +147,45 @@ public class MySqlPignooList<E> implements PignooList<E> {
     }
 
     private String thisFilter2Sql(String sql, PignooFilter<E> filter, SqlParam sqlParam) {
+        String thisSql = "";
         if (filter.getField() != null && filter.getMode() != null) {
-            sql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` " + fmodeToSql(filter.getMode()) + " ";
-            if (filter.getValues().size() == 1) {
-                sql += sqlParam.next(filter.getValues().iterator().next()) + " ";
-            } else if (filter.getValues().size() > 1) {
-                sql += "(" + filter.getValues().stream().map(p -> sqlParam.next(p)).collect(Collectors.joining(",")) + ") ";
+            Collection<Object> values = filter.getValues().stream().filter(p -> p != null).toList();
+            int valueCount = values.size();
+            boolean hasNull = false;
+            if (filter.getMode() == FMode.IN || filter.getMode() == FMode.NOT_IN || filter.getMode() == FMode.EQ || filter.getMode() == FMode.NOT_EQ) {
+                if (filter.getValues().size() != valueCount) {
+                    valueCount += 1;
+                    hasNull = true;
+                }
+            }
+            if (filter.getMode().getMinCount() > valueCount || filter.getMode().getMaxCount() < valueCount) {
+                throw new RuntimeException(filter.getMode() + " can not use " + valueCount + " values -> " +
+                        this.entityMapper.tableName() + "." + this.entityMapper.getColumnByFunction(filter.getField()));
+            }
+            if (values.size() > 0) {
+                thisSql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` " + fmodeToSql(filter.getMode()) + " ";
+                String paramSql = values.stream().map(p -> sqlParam.next(p)).collect(Collectors.joining(","));
+                if (filter.getMode() == FMode.IN || filter.getMode() == FMode.NOT_IN) {
+                    paramSql = "(" + paramSql + ")";
+                }
+                thisSql += paramSql + " ";
+            }
+            if (hasNull) {
+                if (filter.getMode() == FMode.IN) {
+                    thisSql = "(" + thisSql + (thisSql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
+                } else if (filter.getMode() == FMode.NOT_IN) {
+                    thisSql = thisSql + (thisSql.isBlank() ? "" : "AND ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NOT NULL ";
+                } else if (filter.getMode() == FMode.EQ) {
+                    thisSql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL ";
+                } else if (filter.getMode() == FMode.NOT_EQ) {
+                    thisSql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NOT NULL ";
+                } else {
+                    throw new RuntimeException(filter.getMode() + " can not be NULL -> " +
+                            this.entityMapper.tableName() + "." + this.entityMapper.getColumnByFunction(filter.getField()));
+                }
             }
         }
-        return sql;
+        return sql + thisSql;
     }
 
     private String sorter2Sql(PignooSorter<E> sorter) {
