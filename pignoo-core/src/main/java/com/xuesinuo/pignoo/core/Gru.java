@@ -97,7 +97,7 @@ public class Gru {
     public <R> R runTransaction(Function<Pignoo, R> function) {
         PignooConfig config = new PignooConfig();
         config.setEngine(this.engine);
-        config.setUseTransaction(false);
+        config.setUseTransaction(true);
         try (BasePignoo pignoo = new BasePignoo(this.dataSource, config)) {
             try {
                 return function.apply(pignoo);

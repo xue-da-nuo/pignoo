@@ -158,4 +158,18 @@ public class Demo02_Query {
 
         pigList.getOne();// id>10的数据，查询第一个，直接拿到对象，可能为NULL
     }
+
+    /**
+     * 一些聚合函数，比如求和、求总数、求平均
+     */
+    @Test
+    public void getSum() {
+        PignooList<Pig> pigList = pignoo.getPignooList(Pig.class);
+        System.out.println(pigList.size());// 求总数
+        System.out.println(pigList.sum(Pig::getWeight, BigDecimal.class));// 求和
+        System.out.println(pigList.avg(Pig::getAge, Integer.class));// 求平均
+
+        pigList.filter(Pig::getId, ">", 3);
+        System.out.println(pigList.size());
+    }
 }

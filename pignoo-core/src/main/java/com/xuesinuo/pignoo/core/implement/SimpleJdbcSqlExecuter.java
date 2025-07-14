@@ -104,7 +104,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    return rs.getObject(0, c);
+                    return rs.getObject(1, c);
                 }
             }
         } catch (Exception e) {

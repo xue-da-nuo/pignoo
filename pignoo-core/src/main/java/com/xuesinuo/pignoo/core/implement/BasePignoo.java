@@ -74,6 +74,7 @@ public class BasePignoo implements Pignoo {
                 conn.setAutoCommit(false);
             }
         } catch (SQLException e) {
+            this.close();
             throw new RuntimeException(e);
         }
         this.useTransaction = useTransaction;
@@ -122,7 +123,9 @@ public class BasePignoo implements Pignoo {
             if (connAutoCommit != conn.getAutoCommit()) {
                 conn.setAutoCommit(connAutoCommit);
             }
-            conn.close();
+            if (conn != null) {
+                conn.close();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
