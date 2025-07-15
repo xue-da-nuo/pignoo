@@ -10,30 +10,60 @@
   <description>pignoo is a simple jdbc tool.</description>
   <packaging>pom</packaging>
 
+  <url>https://github.com/xuesinuo/pignoo</url>
+  <organization>
+    <name>Xuesinuo</name>
+    <url>https://www.xuesinuo.com</url>
+  </organization>
+
   <modules>
     <module>pignoo-core</module>
-    <module>pignoo-spring</module>
     <module>pignoo-demo</module>
   </modules>
 
   <properties>
-    <java.version>21</java.version>
+    <java.version>11</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <com.xuesinuo.pignoo>0.1.0</com.xuesinuo.pignoo>
+    <!-- Javadoc 编码配置 -->
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
+
+  <!-- 开源许可证配置 -->
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <!-- 开发者信息（请替换为实际信息） -->
+  <developers>
+    <developer>
+      <id>your-github-id</id>
+      <name>Your Name</name>
+      <email>your.email@example.com</email>
+      <url>https://github.com/your-github-id</url>
+      <organization>Xuesinuo</organization>
+      <organizationUrl>https://www.xuesinuo.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <!-- SCM 配置（请替换为实际仓库地址） -->
+  <scm>
+    <connection>scm:git:https://github.com/xuesinuo/pignoo.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:xuesinuo/pignoo.git</developerConnection>
+    <url>https://github.com/xuesinuo/pignoo</url>
+  </scm>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>com.xuesinuo</groupId>
         <artifactId>pignoo-core</artifactId>
-        <version>${com.xuesinuo.pignoo}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.xuesinuo</groupId>
-        <artifactId>pignoo-spring</artifactId>
         <version>${com.xuesinuo.pignoo}</version>
       </dependency>
       <dependency>
@@ -56,26 +86,80 @@
             <target>${maven.compiler.target}</target>
           </configuration>
         </plugin>
+
+        <!-- 源码打包插件 -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.3.0</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Javadoc 生成插件 -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.6.0</version>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+              <!-- 忽略 Javadoc 错误 -->
+              <configuration>
+                <additionalOptions>
+                  <additionalOption>-Xdoclint:none</additionalOption>
+                </additionalOptions>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- GPG 签名插件（用于中央库发布） -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>3.0.1</version>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Nexus 发布插件（用于上传到 Maven 中央库） -->
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.13</version>
+          <configuration>
+            <serverId>ossrh</serverId>
+            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
+          <executions>
+            <execution>
+              <id>default-deploy</id>
+              <phase>deploy</phase>
+              <goals>
+                <goal>deploy</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
-    <!-- <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <includes>
-          <include>**/*.*</include>
-        </includes>
-        <filtering>true</filtering>
-      </resource>
-      <resource>
-        <directory>src/main/java</directory>
-        <includes>
-          <include>**/*.*</include>
-        </includes>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-        <filtering>true</filtering>
-      </resource>
-    </resources> -->
   </build>
 </project>
