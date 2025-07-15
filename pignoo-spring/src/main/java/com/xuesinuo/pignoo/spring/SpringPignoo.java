@@ -1,17 +1,7 @@
 package com.xuesinuo.pignoo.spring;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import com.xuesinuo.pignoo.core.Pignoo;
-import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.PignooList;
-import com.xuesinuo.pignoo.core.implement.MySqlPignooList;
 
 /**
  * 基于Spring数据源管理的Pignoo实现
@@ -27,52 +17,22 @@ import com.xuesinuo.pignoo.core.implement.MySqlPignooList;
  */
 public class SpringPignoo implements Pignoo {
 
-    private final DatabaseEngine engine;// 数据库引擎
-
-    private final DataSource dataSource;// 数据库连接
-
-    /**
-     * 
-     * @param dataSource 数据源
-     *                   <p>
-     *                   Data source
-     * @param config     配置
-     *                   <p>
-     *                   Configuration
-     */
-    public SpringPignoo(DataSource dataSource, PignooConfig config) {
-        DatabaseEngine engine = config.getEngine();
-        if (engine == null) {
-            try (Connection conn = dataSource.getConnection()) {
-                engine = DatabaseEngine.getDatabaseEngineByConnection(conn);
-                conn.commit();
-            } catch (SQLException e) {
-                throw new RuntimeException("Read database engine failed", e);
-            }
-        }
-        if (engine == null) {
-            throw new RuntimeException("Unknow database engine");
-        }
-        this.engine = engine;
-        this.dataSource = dataSource;
+    @Override
+    public void close() throws Exception {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'close'");
     }
 
     @Override
     public <E> PignooList<E> getList(Class<E> c) {
-        switch (engine) {
-        case MySQL:
-            return new MySqlPignooList<E>(this, DataSourceUtils.getConnection(dataSource), TransactionSynchronizationManager.isActualTransactionActive(), c);
-        }
-        throw new RuntimeException("Unknow database engine");
-    }
-
-    @Override
-    public void close() {
-        throw new RuntimeException("Can not close spring-pignoo");
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getList'");
     }
 
     @Override
     public boolean hasClosed() {
-        return false;
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'hasClosed'");
     }
+
 }
