@@ -239,24 +239,6 @@ public class PignooFilter<E> {
     }
 
     /**
-     * 构建一个PignooFilter实例，各属性相等的条件
-     * <p>
-     * Build a PignooFilter instance, equal conditions for all attributes
-     *
-     * @param e 实体
-     *          <p>
-     *          Entity
-     * @return PignooFilter实例
-     *         <p>
-     *         PignooFilter instance
-     */
-    public static <E> PignooFilter<E> build(E e) {
-        PignooFilter<E> pignooFilter = new PignooFilter<>();
-        // TODO 各属性相等的条件
-        return pignooFilter;
-    }
-
-    /**
      * 现有条件上AND拼接下一个条件
      * <p>
      * AND concatenate the next condition on the existing condition
