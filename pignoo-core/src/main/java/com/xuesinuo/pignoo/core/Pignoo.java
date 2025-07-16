@@ -9,7 +9,7 @@ import lombok.Getter;
 /**
  * Pignoo - 小黄人语的“无聊”。《卑鄙的我3》中小黄人们高呼“Pignoo”抗议格活过于无聊
  * <p>
- * Pignoo - The "boring" in the Minions's Language. The Minions call "Pignoo" to protest the boring life
+ * Pignoo - The "boring" in the Minions's Language. The Minions call "Pignoo" to protest the boring life in "Despicable Me 3"
  * <p>
  * Pignoo也是本框架的名称，Pignoo类是本框架的核心类
  * <p>

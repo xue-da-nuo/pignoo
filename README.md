@@ -58,6 +58,7 @@ Pignoo是为了应对小型项目，尤其是面向API编程的时候，我们�
 Pignoo的目标：准确性 > 易用性 > 性能。在功能准确的前提下，操作易用性更为优先，但是这不代表Pignoo的性能非常差。
 
 Pignoo是基于**标准JavaBean**、**JDBC**、**DataSource**、**Slf4j**、**SpringAOP**的：
+
 - 标准JavaBean：Pignoo操作的数据必须都是标准的JavaBean对象，推荐Lombok的@Data注解。否则会映射失败。
 - JDBC：目前还没有考虑兼容Reactive访问方式，一切的根基还是传统JDBC。
 - DataSource：Pignoo不提供DataSource的构建，需要使用者提供一个DataSource，当然推荐DataSource可以是通过连接池构建的。
