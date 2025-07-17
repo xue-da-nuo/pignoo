@@ -2,6 +2,16 @@
 
 Pignoo是一个应对大部分小型Java项目的轻量JDBC框架。
 
+通过Maven引入：
+
+```xml
+<dependency>
+    <groupId>com.xuesinuo</groupId>
+    <artifactId>pignoo-core</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
+
 Pignoo目标是将数据库操作转变成Java的List操作，使用者犹如操作内存一般操作数据库内容，完成数据库操作思路。
 
 来看几个案例：
