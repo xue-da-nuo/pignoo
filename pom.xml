@@ -6,7 +6,7 @@
 
   <groupId>com.xuesinuo</groupId>
   <artifactId>pignoo</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>pignoo</name>
   <description>pignoo is a simple jdbc tool.</description>
   <packaging>pom</packaging>
@@ -17,7 +17,7 @@
   </modules>
 
   <properties>
-    <com.xuesinuo.pignoo>0.1.0</com.xuesinuo.pignoo>
+    <com.xuesinuo.pignoo>0.1.1</com.xuesinuo.pignoo>
     <java.version>21</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.release>${java.version}</maven.compiler.release>
