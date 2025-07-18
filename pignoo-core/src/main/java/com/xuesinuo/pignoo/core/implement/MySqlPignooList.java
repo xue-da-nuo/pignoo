@@ -133,31 +133,31 @@ public class MySqlPignooList<E> implements PignooList<E> {
     }
 
     private String filter2Sql(PignooFilter<E> filter, SqlParam sqlParam) {
-        String sql = "";
+        StringBuilder sql = new StringBuilder("");
         if (filter != null) {
             if (filter.getXor() != null && filter.getXor() == XOR.OR) {
-                sql += "(" + filter.getOtherPignooFilterList().stream().map(f -> filter2Sql(f, sqlParam))
-                        .filter(s -> s != null && !s.isBlank()).collect(Collectors.joining("OR ")) + ") ";
+                sql.append("(" + filter.getOtherPignooFilterList().stream().map(f -> filter2Sql(f, sqlParam))
+                        .filter(s -> s != null && !s.isBlank()).collect(Collectors.joining("OR ")) + ") ");
             } else {
                 boolean first = true;
                 if (filter.getField() != null) {
-                    sql += thisFilter2Sql(sql, filter, sqlParam);
+                    sql.append(thisFilter2Sql(filter, sqlParam));
                     first = false;
                 }
                 for (PignooFilter<E> childFilter : filter.getOtherPignooFilterList()) {
                     String appedSql = filter2Sql(childFilter, sqlParam).trim();
                     if (appedSql != null && !appedSql.isBlank()) {
-                        sql += (first ? "" : "AND ") + appedSql + " ";
+                        sql.append((first ? "" : "AND ") + appedSql + " ");
                         first = false;
                     }
                 }
             }
         }
-        return sql;
+        return sql.toString();
     }
 
-    private String thisFilter2Sql(String sql, PignooFilter<E> filter, SqlParam sqlParam) {
-        String thisSql = "";
+    private String thisFilter2Sql(PignooFilter<E> filter, SqlParam sqlParam) {
+        String sql = "";
         if (filter.getField() != null && filter.getMode() != null) {
             Collection<Object> values = filter.getValues().stream().filter(p -> p != null).toList();
             int valueCount = values.size();
@@ -173,35 +173,35 @@ public class MySqlPignooList<E> implements PignooList<E> {
                         this.entityMapper.tableName() + "." + this.entityMapper.getColumnByFunction(filter.getField()));
             }
             if (values.size() >= filter.getMode().getMinCount()) {
-                thisSql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` " + fmodeToSql(filter.getMode()) + " ";
+                sql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` " + fmodeToSql(filter.getMode()) + " ";
                 String paramSql = values.stream().map(p -> sqlParam.next(p)).collect(Collectors.joining(","));
                 if (!paramSql.isBlank()) {
                     if (filter.getMode() == FMode.IN || filter.getMode() == FMode.NOT_IN) {
                         paramSql = "(" + paramSql + ")";
                     }
-                    thisSql += paramSql + " ";
+                    sql += paramSql + " ";
                 }
             }
             if (hasNull) {
                 if (filter.getMode() == FMode.IN) {
-                    thisSql = "(" + thisSql + (thisSql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
+                    sql = "(" + sql + (sql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
                 } else if (filter.getMode() == FMode.NOT_IN) {
                     // DO NOTHING
                 } else if (filter.getMode() == FMode.EQ) {
-                    thisSql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL ";
+                    sql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL ";
                 } else if (filter.getMode() == FMode.NE) {
-                    thisSql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NOT NULL ";
+                    sql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NOT NULL ";
                 } else {
                     throw new RuntimeException(filter.getMode() + " can not be NULL -> " +
                             this.entityMapper.tableName() + "." + this.entityMapper.getColumnByFunction(filter.getField()));
                 }
             } else {
                 if (filter.getMode() == FMode.NOT_IN) {
-                    thisSql = "(" + thisSql + (thisSql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
+                    sql = "(" + sql + (sql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
                 }
             }
         }
-        return sql + thisSql;
+        return sql;
     }
 
     private String sorter2Sql(PignooSorter<E> sorter) {
@@ -232,10 +232,28 @@ public class MySqlPignooList<E> implements PignooList<E> {
             sql.append("ORDER BY ");
             sql.append(sorter2Sql(sorter));
         }
-        if (inTransaction) {
-            sql.append("FOR UPDATE ");
-        }
+        sql.append("LIMIT 1 ");
         E e = SqlExecuter.selectOne(conn, sql.toString(), sqlParam.params, c);
+        if (e != null && inTransaction) {
+            StringBuilder sql2 = new StringBuilder("");
+            SqlParam sqlParam2 = new SqlParam();
+            Object primaryKeyValue = null;
+            try {
+                primaryKeyValue = entityMapper.primaryKeyGetter().invoke(e);
+            } catch (IllegalAccessException | InvocationTargetException ex) {
+                throw new RuntimeException("Primary key is not found " + e, ex);
+            }
+            if (primaryKeyValue == null) {
+                throw new RuntimeException("Primary key is null " + e);
+            }
+            sql2.append("SELECT ");
+            sql2.append(entityMapper.columns().stream().map(column -> "`" + column + "`").collect(Collectors.joining(",")) + " ");
+            sql2.append("FROM ");
+            sql2.append("`" + entityMapper.tableName() + "` ");
+            sql2.append("WHERE `" + entityMapper.primaryKeyColumn() + "`=" + sqlParam2.next(primaryKeyValue) + " ");
+            sql2.append("FOR UPDATE ");
+            e = SqlExecuter.selectOne(conn, sql2.toString(), sqlParam2.params, c);
+        }
         return entityProxyFactory.build(e);
     }
 

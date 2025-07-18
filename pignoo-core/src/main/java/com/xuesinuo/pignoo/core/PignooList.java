@@ -46,9 +46,9 @@ public interface PignooList<E> {
      * <p>
      * Get the first data in the table
      * 
-     * @return 第一条数据
+     * @return 第一条数据，可能为null
      *         <p>
-     *         The first data
+     *         The first data, may be null
      */
     E getOne();
 

@@ -41,13 +41,18 @@ public class Gru {
      */
     public Gru(DataSource dataSource, PignooConfig config) {
         DatabaseEngine engine = config.getEngine();
-        if (engine == null) {
-            try (Connection conn = dataSource.getConnection()) {
-                engine = DatabaseEngine.getDatabaseEngineByConnection(conn);
-                conn.commit();
-            } catch (SQLException e) {
-                throw new RuntimeException("Read database engine failed", e);
+        try (Connection conn = dataSource.getConnection()) {
+            if (conn == null) {
+                throw new RuntimeException("DataSource Error: get connection failed");
             }
+            if (engine == null) {
+                engine = DatabaseEngine.getDatabaseEngineByConnection(conn);
+            }
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Read database engine failed", e);
         }
         if (engine == null) {
             throw new RuntimeException("Unknow database engine");
