@@ -2,7 +2,7 @@
 
 Pignoo是一个应对大部分小型Java项目的轻量JDBC框架。
 
-Pignoo目标是将数据库操作转变成Java的List操作，使用者犹如操作内存一般操作数据库内容，完全数据库操作思路。
+Pignoo目标是将数据库操作转变成Java的List操作，使用者犹如操作内存一般操作数据库内容，完成数据库操作思路。
 
 来看几个案例：
 
@@ -23,7 +23,7 @@ public class Pig {
 ```java
 public class Test {
     private static DataSource dataSource;// 通过任何形式构建好数据源，比如HikariCP、DBCP...
-    private Pignoo pignoo = new BasePignoo(Test.dataSource);// 使用数据源，可以构建一个Pignoo实例，我们就同它来操作数据库
+    private Pignoo pignoo = new BasePignoo(Test.dataSource);// 使用数据源，可以构建一个Pignoo实例，我们就用它来操作数据库
 
     public void test() {
         PignooList<Pig> pigList = pignoo.getList(Pig.class);
@@ -40,7 +40,7 @@ public class Test {
 }
 ```
 
-上面已经是一个引入Pignoo后，完整的JDBC案例，在此基础上，你只需要构建出所需的DataSource，不再需要任何多余的代码，就可以完成数据库操作。
+上面已经是一个引入Pignoo后，完整的JDBC案例，在此基础上，你还需要额外构建出所需的DataSource，就不再需要做其他事，完成数据库操作。
 
 可以看出，Pignoo的数据库操作，完全符合Java操作List的思路，虽然舍弃了很多SQL的高级功能，但是在小型项目中，这很实用。如果你觉得这种操作数据的方式还不错，认真看完我给出的demo项目，防止到一些坑。
 
@@ -59,17 +59,31 @@ Pignoo的目标：准确性 > 易用性 > 性能。在功能准确的前提下�
 
 Pignoo是基于**标准JavaBean**、**JDBC**、**DataSource**、**Slf4j**、**SpringAOP**的：
 
-- 标准JavaBean：Pignoo操作的数据必须都是标准的JavaBean对象，推荐Lombok的@Data注解。否则会映射失败。
+- 标准JavaBean：Pignoo操作的数据必须都是标准的JavaBean对象，推荐Lombok的@Data注解。
 - JDBC：目前还没有考虑兼容Reactive访问方式，一切的根基还是传统JDBC。
 - DataSource：Pignoo不提供DataSource的构建，需要使用者提供一个DataSource，当然推荐DataSource可以是通过连接池构建的。
 - Slf4j：Pignoo的日志是基于Slf4j的，例如输出com.xuesinuo.pignoo下的debug日志可以看到SQL执行情况。
 - SpringAOP：Pignoo中用到了CGLIB动态代理，SpringAOP作为优秀的AOP框架，Pignoo基于它实现的动态代理。
+- JDK17：目前版本基于SpringAOP6.2.8，所以需要最低JDK17的支持。但其实Pignoo没有用到很新的特性。如果你很需要，可以issue+邮件来催促降低JDK版本。
+
+## 不要以SQL操作的眼光看待Pignoo
+
+在使用PignooList时，请按照使用List的操作直觉来使用它。我来举一个例子：
+
+```java
+    pignoo.getList(Pig.class)
+        .sort(Pig::getId, SMode.MIN_FIRST);// 按照ID从小到大排序
+        .sort(Pig::getName, SMode.MIN_FIRST);// 按照Name字典序从前到后排序
+        .getAll();// 查询最终结果是：先按Name字典序排序，同名时再按ID从小到大排序
+```
+
+如果你还是在用SQL思路看待问题，你会认为上面代码是“先按ID排序，再按Name排序”。但设想一下，你如果是用同样的方式`.stream()`操作List，第二次排序时候，会将第一次的排序结果打乱！PignooList也是这个思路，最终结果会优先最后指定的排序规则。
 
 ## 动态代理用在哪里
 
 Pignoo中，有个很关键的设计思路：用List与对象的操作取代数据库操作。为了实现这个构想，从PignooList中取出的每个对象，都会增加一层代理，代理监听setter方法并执行SQL操作，从而达到对象操作等于数据操作的效果。这也是Pignoo牺牲性能，换取易用性的提现。
 
-Pignoo对象的**作用域**外，setter的代理操作会失效。方便将对象传出Pignoo作用范围后，再做其他set操作，不会影响数据库。
+Pignoo的**作用域**外，setter的代理操作会失效。方便将对象传出Pignoo作用范围后，再做其他set操作，不会影响数据库。
 
 ## 为啥叫Pignoo
 
@@ -116,14 +130,21 @@ v0.1.0注意事项：
 - 如果你需要连接池、如果你需要事务传播行为，这些交给其他框架。例如Pignoo后续做了Spring事务控制的兼容，这些问题就由Spring来解决吧
 - 现在虽然没有接入Spring的事务管理，但可以使用Spring的DataSource接入Gru，使用Pignoo的事务管理
 
-TODO清单：（这个清单任重而道远，具体做到哪一步，看实际需要吧...）
+## 开发计划
 
-- 兼容更多SQL方言
-- 可选择是否使用代理，如果不使用代理，将对象“放入”List时视为插入或更新操作
-- 将Pignoo融入Spring的事务管理，且给出默认的Boot-Pignoo-Starter
-- 支持更多SQL功能
-  - 实体嵌套，表关联
-  - 联合主键
-  - 无主键
-  - 其他
-- 兼容Reactive访问方式（Vert.x - API）
+- v0.1.1
+  - 当事务中使用getOne查询时，改用主键加“写锁”
+  - 优化SQL拼接性能
+  - 调整Filter实现架构，优化性能
+- v0.2.0
+  - 增加一个表结构识别器，自动将代码中的实体映射成表
+- 其他可能的扩展（任重而道远，具体做到哪一步，看实际需要吧...）
+  - 兼容更多SQL方言
+  - 可选择是否使用代理，如果不使用代理，将对象“放入”List时视为插入或更新操作
+  - 将Pignoo融入Spring的事务管理，且给出默认的Boot-Pignoo-Starter
+  - 支持更多SQL功能
+    - 实体嵌套，表关联
+    - 联合主键
+    - 无主键
+    - 其他
+  - 兼容Reactive访问方式（Vert.x - API）
