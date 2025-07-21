@@ -28,7 +28,7 @@ import com.xuesinuo.pignoo.spring.config.PignooTransactionSynchronizationAdapter
 @Slf4j
 public class SpringPignoo implements Pignoo {
 
-    private final DataSource dataSource;// 数据源
+    private DataSource dataSource;// 数据源
 
     private final PignooConfig config;// 配置
 
@@ -133,6 +133,7 @@ public class SpringPignoo implements Pignoo {
     public void close() {
         this.basePignoo.close();
         this.hasClosed = true;
+        this.dataSource = null;
         log.warn("Pignoo-Spring closed! Please confirm that the SpringIoC container is also closed, otherwise this is an abnormal shutdown!");
     }
 

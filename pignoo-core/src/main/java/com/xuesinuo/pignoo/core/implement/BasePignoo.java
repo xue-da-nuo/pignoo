@@ -26,7 +26,7 @@ public class BasePignoo implements Pignoo {
 
     private final PignooConfig config;// Pignoo配置
 
-    private final DataSource dataSource;// 数据源
+    private DataSource dataSource;// 数据源
 
     private boolean hasClosed = false;// 是否已经关闭
 
@@ -118,6 +118,7 @@ public class BasePignoo implements Pignoo {
     @Override
     public void close() {
         this.hasClosed = true;
+        this.dataSource = null;
     }
 
     @Override

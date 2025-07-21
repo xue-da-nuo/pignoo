@@ -22,7 +22,7 @@ public class TransactionPignoo implements Pignoo {
 
     private final PignooConfig config;// Pignoo配置
 
-    private final DataSource dataSource;// 数据源
+    private DataSource dataSource;// 数据源
 
     private Connection conn;// 数据库连接
 
@@ -63,8 +63,7 @@ public class TransactionPignoo implements Pignoo {
         }
         if (this.config.getEngine() == null) {
             try {
-                this.getConnection();
-                this.config.setEngine(DatabaseEngine.getDatabaseEngineByConnection(this.conn));
+                this.config.setEngine(DatabaseEngine.getDatabaseEngineByConnection(this.getConnection()));
             } catch (SQLException e) {
                 this.close();
                 throw new RuntimeException(e);
@@ -124,6 +123,8 @@ public class TransactionPignoo implements Pignoo {
             return;
         }
         hasClosed = true;
+        conn = null;
+        dataSource = null;
         if (!hasRollbacked) {
             try {
                 conn.commit();

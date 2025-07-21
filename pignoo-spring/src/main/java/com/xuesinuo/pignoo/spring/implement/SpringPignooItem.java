@@ -31,7 +31,7 @@ public class SpringPignooItem implements Pignoo {
 
     private final PignooConfig config;// Pignoo配置
 
-    private final DataSource dataSource;// 数据源
+    private DataSource dataSource;// 数据源
 
     private final boolean inTransaction;// 是否在事务中
 
@@ -100,8 +100,9 @@ public class SpringPignooItem implements Pignoo {
     }
 
     @Override
-    public synchronized void close() {
-        hasClosed = true;
+    public void close() {
+        this.hasClosed = true;
+        this.dataSource = null;
     }
 
     @Override
