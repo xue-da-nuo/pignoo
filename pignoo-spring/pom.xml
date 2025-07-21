@@ -53,6 +53,7 @@
     <dependency>
       <groupId>com.xuesinuo</groupId>
       <artifactId>pignoo-core</artifactId>
+      <version>${com.xuesinuo.pignoo.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

@@ -18,7 +18,7 @@
   </modules>
 
   <properties>
-    <com.xuesinuo.pignoo>0.2.1</com.xuesinuo.pignoo>
+    <com.xuesinuo.pignoo.version>0.2.1</com.xuesinuo.pignoo.version>
     <java.version>21</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.release>${java.version}</maven.compiler.release>
@@ -32,17 +32,17 @@
       <dependency>
         <groupId>com.xuesinuo</groupId>
         <artifactId>pignoo-core</artifactId>
-        <version>${com.xuesinuo.pignoo}</version>
+        <version>${com.xuesinuo.pignoo.version}</version>
       </dependency>
       <dependency>
         <groupId>com.xuesinuo</groupId>
         <artifactId>pignoo-demo</artifactId>
-        <version>${com.xuesinuo.pignoo}</version>
+        <version>${com.xuesinuo.pignoo.version}</version>
       </dependency>
       <dependency>
         <groupId>com.xuesinuo</groupId>
         <artifactId>pignoo-spring</artifactId>
-        <version>${com.xuesinuo.pignoo}</version>
+        <version>${com.xuesinuo.pignoo.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
