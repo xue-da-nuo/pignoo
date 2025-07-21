@@ -32,6 +32,10 @@
       <artifactId>pignoo-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.xuesinuo</groupId>
+      <artifactId>pignoo-spring</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.mysql</groupId>
       <artifactId>mysql-connector-j</artifactId>
       <version>8.4.0</version>

@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.annotation.Column;
 import com.xuesinuo.pignoo.core.annotation.PrimaryKey;
 import com.xuesinuo.pignoo.core.annotation.Table;
@@ -36,15 +37,16 @@ public class ClassInfo<E> {
     protected List<String> getterNames = new ArrayList<>();
     protected List<String> setterNames = new ArrayList<>();
 
-    public ClassInfo(Class<E> c, AnnotationMode annotationMode, AnnotationMixMode annotationMixMode, PrimaryKeyNamingConvention primaryKeyNamingConvention, Boolean autoPrimaryKey) {
-        if (annotationMode == null) {
-            annotationMode = AnnotationMode.MIX;
+    public ClassInfo(Class<E> c, PignooConfig config) {
+        config = config.copy();
+        if (config.getAnnotationMode() == null) {
+            config.setAnnotationMode(AnnotationMode.MIX);
         }
-        if (annotationMixMode == null) {
-            annotationMixMode = AnnotationMixMode.CAMEL_TO_SNAKE;
+        if (config.getAnnotationMixMode() == null) {
+            config.setAnnotationMixMode(AnnotationMixMode.CAMEL_TO_SNAKE);
         }
         Table tableAnn = c.getAnnotation(Table.class);
-        if (annotationMode == AnnotationMode.MUST && tableAnn == null) {
+        if (config.getAnnotationMode() == AnnotationMode.MUST && tableAnn == null) {
             throw new RuntimeException("Entity " + c.getName() + " missing @Table");
         }
         if (tableAnn != null && (tableAnn.value() == null || tableAnn.value().isBlank())) {
@@ -52,10 +54,10 @@ public class ClassInfo<E> {
         }
         if (tableAnn != null) {
             this.tableName = tableAnn.value();
-        } else if (annotationMode == AnnotationMode.MIX) {
-            if (annotationMixMode == AnnotationMixMode.SAME) {
+        } else if (config.getAnnotationMode() == AnnotationMode.MIX) {
+            if (config.getAnnotationMixMode() == AnnotationMixMode.SAME) {
                 this.tableName = c.getSimpleName();
-            } else if (annotationMixMode == AnnotationMixMode.CAMEL_TO_SNAKE) {
+            } else if (config.getAnnotationMixMode() == AnnotationMixMode.CAMEL_TO_SNAKE) {
                 this.tableName = camel2Underline(c.getSimpleName());
             }
         }
@@ -72,7 +74,7 @@ public class ClassInfo<E> {
             if (field.isAnnotationPresent(PrimaryKey.class)) {
                 PrimaryKey primaryKeyAnn = field.getAnnotation(PrimaryKey.class);
                 Column columnAnn = field.getAnnotation(Column.class);
-                if (columnAnn == null && annotationMode == AnnotationMode.MUST) {
+                if (columnAnn == null && config.getAnnotationMode() == AnnotationMode.MUST) {
                     throw new RuntimeException("Entity " + c.getName() + " the primaryKey missing @Column");
                 }
                 if (columnAnn != null && (columnAnn.value() == null || columnAnn.value().isBlank())) {
@@ -80,10 +82,10 @@ public class ClassInfo<E> {
                 }
                 if (columnAnn != null) {
                     this.primaryKeyColumn = columnAnn.value();
-                } else if (annotationMode == AnnotationMode.MIX) {
-                    if (annotationMixMode == AnnotationMixMode.SAME) {
+                } else if (config.getAnnotationMode() == AnnotationMode.MIX) {
+                    if (config.getAnnotationMixMode() == AnnotationMixMode.SAME) {
                         this.primaryKeyColumn = field.getName();
-                    } else if (annotationMixMode == AnnotationMixMode.CAMEL_TO_SNAKE) {
+                    } else if (config.getAnnotationMixMode() == AnnotationMixMode.CAMEL_TO_SNAKE) {
                         this.primaryKeyColumn = camel2Underline(field.getName());
                     }
                 }
@@ -100,11 +102,11 @@ public class ClassInfo<E> {
                 this.primaryKeyGetter = getterSetter[0];
                 this.primaryKeySetter = getterSetter[1];
             }
-            if (field.isAnnotationPresent(Column.class) || annotationMode == AnnotationMode.MIX) {
+            if (field.isAnnotationPresent(Column.class) || config.getAnnotationMode() == AnnotationMode.MIX) {
                 this.fields.add(field);
                 Column columnAnn = field.getAnnotation(Column.class);
                 String columnName = null;
-                if (columnAnn == null && annotationMode == AnnotationMode.MUST) {
+                if (columnAnn == null && config.getAnnotationMode() == AnnotationMode.MUST) {
                     throw new RuntimeException("Entity " + c.getName() + "#" + field.getName() + " missing @Column");
                 }
                 if (columnAnn != null && (columnAnn.value() == null || columnAnn.value().isBlank())) {
@@ -112,10 +114,10 @@ public class ClassInfo<E> {
                 }
                 if (columnAnn != null) {
                     columnName = columnAnn.value();
-                } else if (annotationMode == AnnotationMode.MIX) {
-                    if (annotationMixMode == AnnotationMixMode.SAME) {
+                } else if (config.getAnnotationMode() == AnnotationMode.MIX) {
+                    if (config.getAnnotationMixMode() == AnnotationMixMode.SAME) {
                         columnName = field.getName();
-                    } else if (annotationMixMode == AnnotationMixMode.CAMEL_TO_SNAKE) {
+                    } else if (config.getAnnotationMixMode() == AnnotationMixMode.CAMEL_TO_SNAKE) {
                         columnName = camel2Underline(field.getName());
                     }
                 }
@@ -132,8 +134,8 @@ public class ClassInfo<E> {
         }
         if (this.primaryKeyField == null) {
             String pkName;
-            if (primaryKeyNamingConvention != null) {
-                pkName = primaryKeyNamingConvention.naming(tableName, c.getSimpleName());
+            if (config.getPrimaryKeyNamingConvention() != null) {
+                pkName = config.getPrimaryKeyNamingConvention().naming(tableName, c.getSimpleName());
             } else {
                 pkName = PrimaryKeyNamingConvention.DEFAULT.naming(tableName, c.getSimpleName());
             }
@@ -145,10 +147,10 @@ public class ClassInfo<E> {
                 throw new RuntimeException("Entity " + c.getName() + " PrimaryKey not found");
             }
             this.primaryKeyColumn = pkName;
-            if (autoPrimaryKey == null) {
+            if (config.getAutoPrimaryKey() == null) {
                 this.autoPrimaryKey = true;
             } else {
-                this.autoPrimaryKey = autoPrimaryKey;
+                this.autoPrimaryKey = config.getAutoPrimaryKey();
             }
             this.primaryKeyField = this.fields.get(indexOfPk);
             this.primaryKeyGetter = this.getters.get(indexOfPk);

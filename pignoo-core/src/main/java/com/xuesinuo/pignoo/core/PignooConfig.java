@@ -59,4 +59,21 @@ public class PignooConfig {
      * @version 0.2.0
      */
     private Boolean autoPrimaryKey = true;
+
+    /**
+     * 复制一份配置文件
+     * <p>
+     * Copy a configuration file
+     * 
+     * @version 0.2.1
+     */
+    public PignooConfig copy() {
+        PignooConfig config = new PignooConfig();
+        config.setEngine(this.engine);
+        config.setAnnotationMode(this.annotationMode);
+        config.setAnnotationMixMode(this.annotationMixMode);
+        config.setPrimaryKeyNamingConvention(this.primaryKeyNamingConvention);
+        config.setAutoPrimaryKey(this.autoPrimaryKey);
+        return config;
+    }
 }

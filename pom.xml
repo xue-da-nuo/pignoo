@@ -14,6 +14,7 @@
   <modules>
     <module>pignoo-core</module>
     <module>pignoo-demo</module>
+    <module>pignoo-spring</module>
   </modules>
 
   <properties>
@@ -36,6 +37,11 @@
       <dependency>
         <groupId>com.xuesinuo</groupId>
         <artifactId>pignoo-demo</artifactId>
+        <version>${com.xuesinuo.pignoo}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xuesinuo</groupId>
+        <artifactId>pignoo-spring</artifactId>
         <version>${com.xuesinuo.pignoo}</version>
       </dependency>
     </dependencies>

@@ -7,10 +7,7 @@ import java.util.function.Function;
 
 import javax.sql.DataSource;
 
-import com.xuesinuo.pignoo.core.config.AnnotationMode;
-import com.xuesinuo.pignoo.core.config.AnnotationMode.AnnotationMixMode;
 import com.xuesinuo.pignoo.core.config.DatabaseEngine;
-import com.xuesinuo.pignoo.core.config.PrimaryKeyNamingConvention;
 import com.xuesinuo.pignoo.core.implement.BasePignoo;
 import com.xuesinuo.pignoo.core.implement.TransactionPignoo;
 
@@ -31,12 +28,8 @@ import com.xuesinuo.pignoo.core.implement.TransactionPignoo;
  * @since 0.1.0
  */
 public class Gru {
-    private final DatabaseEngine engine;// 数据库引擎
+    private final PignooConfig config;// Pignoo配置
     private final DataSource dataSource;// 数据源
-    private final AnnotationMode annotationMode;
-    private final AnnotationMixMode annotationMixMode;
-    private final PrimaryKeyNamingConvention primaryKeyNamingConvention;
-    private final Boolean autoPrimaryKey;
 
     /**
      * 
@@ -50,6 +43,8 @@ public class Gru {
     public Gru(DataSource dataSource, PignooConfig config) {
         if (config == null) {
             config = new PignooConfig();
+        } else {
+            config = config.copy();
         }
         if (dataSource == null) {
             throw new RuntimeException("DataSource Error: DataSource is null");
@@ -71,12 +66,9 @@ public class Gru {
         if (engine == null) {
             throw new RuntimeException("Unknow database engine");
         }
-        this.engine = engine;
+        config.setEngine(engine);
+        this.config = config;
         this.dataSource = dataSource;
-        this.annotationMode = config.getAnnotationMode();
-        this.annotationMixMode = config.getAnnotationMixMode();
-        this.primaryKeyNamingConvention = config.getPrimaryKeyNamingConvention();
-        this.autoPrimaryKey = config.getAutoPrimaryKey();
     }
 
     /**
@@ -105,13 +97,7 @@ public class Gru {
      *         Custom return value
      */
     public <R> R run(Function<Pignoo, R> function) {
-        PignooConfig config = new PignooConfig();
-        config.setEngine(this.engine);
-        config.setAnnotationMode(this.annotationMode);
-        config.setAnnotationMixMode(this.annotationMixMode);
-        config.setPrimaryKeyNamingConvention(this.primaryKeyNamingConvention);
-        config.setAutoPrimaryKey(this.autoPrimaryKey);
-        try (BasePignoo pignoo = new BasePignoo(this.dataSource, config)) {
+        try (BasePignoo pignoo = new BasePignoo(this.dataSource, this.config)) {
             return function.apply(pignoo);
         }
     }
@@ -132,13 +118,7 @@ public class Gru {
      *         Custom return value
      */
     public void runTransaction(Consumer<Pignoo> function) {
-        PignooConfig config = new PignooConfig();
-        config.setEngine(this.engine);
-        config.setAnnotationMode(this.annotationMode);
-        config.setAnnotationMixMode(this.annotationMixMode);
-        config.setPrimaryKeyNamingConvention(this.primaryKeyNamingConvention);
-        config.setAutoPrimaryKey(this.autoPrimaryKey);
-        try (TransactionPignoo pignoo = new TransactionPignoo(this.dataSource, config)) {
+        try (TransactionPignoo pignoo = new TransactionPignoo(this.dataSource, this.config)) {
             try {
                 function.accept(pignoo);
             } catch (Exception e) {

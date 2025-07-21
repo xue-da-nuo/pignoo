@@ -18,7 +18,7 @@ import com.xuesinuo.pignoo.demo.table.Pig;
  * <p>
  * 如果使用Pignoo自带的事务管理，建议使用{@link Gru}，否则就需要多写很多事务控制代码！
  * <p>
- * 或者可以用Spring，或者其他带有数据源管理的框架
+ * 或者可以用Pignoo-Spring，依赖Spring的事务管理
  */
 @SpringBootTest
 public class Demo04_Transactional {
