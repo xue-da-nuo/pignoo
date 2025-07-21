@@ -2,6 +2,7 @@ package com.xuesinuo.pignoo.core.implement;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.sql.DataSource;
@@ -11,6 +12,9 @@ import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.PignooList;
 import com.xuesinuo.pignoo.core.config.AnnotationMode;
 import com.xuesinuo.pignoo.core.config.AnnotationMode.AnnotationMixMode;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.xuesinuo.pignoo.core.config.DatabaseEngine;
 import com.xuesinuo.pignoo.core.config.PrimaryKeyNamingConvention;
 
@@ -20,6 +24,7 @@ import com.xuesinuo.pignoo.core.config.PrimaryKeyNamingConvention;
  * @author xuesinuo
  * @since 0.1.0
  */
+@Slf4j
 public class BasePignoo implements Pignoo {
 
     private final DatabaseEngine engine;// 数据库引擎
@@ -89,21 +94,46 @@ public class BasePignoo implements Pignoo {
         this.autoPrimaryKey = autoPrimaryKey;
     }
 
-    private Supplier<Connection> connGetter() {
-        return () -> {
-            try {
-                return this.dataSource.getConnection();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        };
+    private synchronized Connection getConnection() {
+        if (hasClosed) {
+            throw new RuntimeException("Pignoo has closed, can not get connection");
+        }
+        try {
+            return this.dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+    private Supplier<Connection> connGetter = () -> this.getConnection();
+
+    private Consumer<Connection> connCloser = (conn) -> {
+        Exception e = null;
+        try {
+            if (conn.getAutoCommit() == false) {
+                conn.commit();
+            }
+        } catch (Exception ex) {
+            log.error("Connection commit error", ex);
+            e = ex;
+        } finally {
+            try {
+                conn.close();
+            } catch (Exception ex) {
+                log.error("Connection close error", ex);
+                e = ex;
+            }
+        }
+        if (e != null) {
+            throw new RuntimeException(e);
+        }
+    };
 
     @Override
     public <E> PignooList<E> getList(Class<E> c) {
         switch (engine) {
         case MySQL:
-            return new MySqlPignooList<E>(this, connGetter(), false, c, annotationMode, annotationMixMode, primaryKeyNamingConvention, autoPrimaryKey);
+            return new MySqlPignooList<E>(this, connGetter, connCloser, false, c, annotationMode, annotationMixMode, primaryKeyNamingConvention, autoPrimaryKey);
         }
         throw new RuntimeException("Unknow database engine");
     }

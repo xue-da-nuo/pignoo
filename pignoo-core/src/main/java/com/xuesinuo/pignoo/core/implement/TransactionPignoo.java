@@ -2,6 +2,7 @@ package com.xuesinuo.pignoo.core.implement;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.sql.DataSource;
@@ -98,6 +99,9 @@ public class TransactionPignoo implements Pignoo {
     }
 
     private synchronized Connection getConnection() {
+        if (this.hasClosed) {
+            throw new RuntimeException("Pignoo has closed, can not get connection");
+        }
         if (this.conn != null) {
             return this.conn;
         }
@@ -112,17 +116,15 @@ public class TransactionPignoo implements Pignoo {
         return this.conn;
     }
 
-    private Supplier<Connection> connGetter() {
-        return () -> {
-            return this.getConnection();
-        };
-    }
+    private Supplier<Connection> connGetter = () -> this.getConnection();
+
+    private Consumer<Connection> connCloser = (conn) -> {};
 
     @Override
     public <E> PignooList<E> getList(Class<E> c) {
         switch (engine) {
         case MySQL:
-            return new MySqlPignooList<E>(this, connGetter(), true, c, annotationMode, annotationMixMode, primaryKeyNamingConvention, autoPrimaryKey);
+            return new MySqlPignooList<E>(this, connGetter, connCloser, true, c, annotationMode, annotationMixMode, primaryKeyNamingConvention, autoPrimaryKey);
         }
         throw new RuntimeException("Unknow database engine");
     }

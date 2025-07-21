@@ -18,9 +18,9 @@ import lombok.Data;
 @Data
 public class PignooConfig {
     /**
-     * 数据库引擎
+     * 数据库引擎。如果不配置，则尝试从数据库读取
      * <p>
-     * Database engine
+     * Database engine。 If not configured, try to read from the database
      */
     private DatabaseEngine engine;
 
@@ -34,18 +34,18 @@ public class PignooConfig {
     private AnnotationMode annotationMode = AnnotationMode.MIX;
 
     /**
-     * 注解混合使用方式
+     * 注解混合使用方式（当annotationMode=MIX时生效）
      * <p>
-     * Annotation mixed usage
+     * Annotation mixed usage(when annotationMode=MIX is effective)
      * 
      * @version 0.2.0
      */
     private AnnotationMixMode annotationMixMode = AnnotationMixMode.CAMEL_TO_SNAKE;
 
     /**
-     * 主键命名规则
+     * 主键命名规则{@link FunctionalInterface}
      * <p>
-     * PrimaryKey naming convention
+     * PrimaryKey naming convention{@link FunctionalInterface}
      * 
      * @version 0.2.0
      */

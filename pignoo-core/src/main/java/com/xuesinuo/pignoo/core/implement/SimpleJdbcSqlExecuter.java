@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.xuesinuo.pignoo.core.SqlExecuter;
@@ -31,7 +32,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
     }
 
     @Override
-    public <E> E selectOne(Supplier<Connection> connGetter, boolean inTransaction, String sql, Map<Integer, Object> params, Class<E> c) {
+    public <E> E selectOne(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c) {
         log.debug(sql);
         log.debug(params.toString());
         EntityMapper<E> mapper = EntityMapper.build(c);
@@ -63,33 +64,15 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
             throw ex;
         } finally {
-            if (!inTransaction && conn != null) {
-                Exception e = null;
-                try {
-                    if (conn.getAutoCommit() == false) {
-                        conn.commit();
-                    }
-                } catch (Exception ex) {
-                    log.error("Connection commit error", ex);
-                    e = ex;
-                } finally {
-                    try {
-                        conn.close();
-                    } catch (Exception ex) {
-                        log.error("Connection close error", ex);
-                        e = ex;
-                    }
-                }
-                if (e != null) {
-                    throw new RuntimeException(e);
-                }
+            if (conn != null) {
+                connCloser.accept(conn);
             }
         }
         return null;
     }
 
     @Override
-    public <E> List<E> selectList(Supplier<Connection> connGetter, boolean inTransaction, String sql, Map<Integer, Object> params, Class<E> c) {
+    public <E> List<E> selectList(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c) {
         log.debug(sql);
         log.debug(params.toString());
         EntityMapper<E> mapper = EntityMapper.build(c);
@@ -122,33 +105,15 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
             throw ex;
         } finally {
-            if (!inTransaction && conn != null) {
-                Exception e = null;
-                try {
-                    if (conn.getAutoCommit() == false) {
-                        conn.commit();
-                    }
-                } catch (Exception ex) {
-                    log.error("Connection commit error", ex);
-                    e = ex;
-                } finally {
-                    try {
-                        conn.close();
-                    } catch (Exception ex) {
-                        log.error("Connection close error", ex);
-                        e = ex;
-                    }
-                }
-                if (e != null) {
-                    throw new RuntimeException(e);
-                }
+            if (conn != null) {
+                connCloser.accept(conn);
             }
         }
         return list;
     }
 
     @Override
-    public <R> R selectColumn(Supplier<Connection> connGetter, boolean inTransaction, String sql, Map<Integer, Object> params, Class<R> c) {
+    public <R> R selectColumn(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<R> c) {
         log.debug(sql);
         log.debug(params.toString());
         Connection conn = null;
@@ -173,33 +138,15 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
             throw ex;
         } finally {
-            if (!inTransaction && conn != null) {
-                Exception e = null;
-                try {
-                    if (conn.getAutoCommit() == false) {
-                        conn.commit();
-                    }
-                } catch (Exception ex) {
-                    log.error("Connection commit error", ex);
-                    e = ex;
-                } finally {
-                    try {
-                        conn.close();
-                    } catch (Exception ex) {
-                        log.error("Connection close error", ex);
-                        e = ex;
-                    }
-                }
-                if (e != null) {
-                    throw new RuntimeException(e);
-                }
+            if (conn != null) {
+                connCloser.accept(conn);
             }
         }
         return null;
     }
 
     @Override
-    public <R> Object insert(Supplier<Connection> connGetter, boolean inTransaction, String sql, Map<Integer, Object> params, Class<R> c) {
+    public <R> Object insert(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<R> c) {
         log.debug(sql);
         log.debug(params.toString());
         Object primaryKeyValue = null;
@@ -228,33 +175,15 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
             throw ex;
         } finally {
-            if (!inTransaction && conn != null) {
-                Exception e = null;
-                try {
-                    if (conn.getAutoCommit() == false) {
-                        conn.commit();
-                    }
-                } catch (Exception ex) {
-                    log.error("Connection commit error", ex);
-                    e = ex;
-                } finally {
-                    try {
-                        conn.close();
-                    } catch (Exception ex) {
-                        log.error("Connection close error", ex);
-                        e = ex;
-                    }
-                }
-                if (e != null) {
-                    throw new RuntimeException(e);
-                }
+            if (conn != null) {
+                connCloser.accept(conn);
             }
         }
         return primaryKeyValue;
     }
 
     @Override
-    public long update(Supplier<Connection> connGetter, boolean inTransaction, String sql, Map<Integer, Object> params) {
+    public long update(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params) {
         log.debug(sql);
         log.debug(params.toString());
         Connection conn = null;
@@ -276,26 +205,8 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
             throw ex;
         } finally {
-            if (!inTransaction && conn != null) {
-                Exception e = null;
-                try {
-                    if (conn.getAutoCommit() == false) {
-                        conn.commit();
-                    }
-                } catch (Exception ex) {
-                    log.error("Connection commit error", ex);
-                    e = ex;
-                } finally {
-                    try {
-                        conn.close();
-                    } catch (Exception ex) {
-                        log.error("Connection close error", ex);
-                        e = ex;
-                    }
-                }
-                if (e != null) {
-                    throw new RuntimeException(e);
-                }
+            if (conn != null) {
+                connCloser.accept(conn);
             }
         }
     }
