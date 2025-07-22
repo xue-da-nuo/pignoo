@@ -31,7 +31,7 @@ public class Test {
     private Pignoo pignoo = new BasePignoo(Test.dataSource);// 使用数据源，可以构建一个Pignoo实例，我们就用它来操作数据库
 
     public void test() {
-        PignooList<Pig> pigList = pignoo.getList(Pig.class);
+        PignooWriter<Pig> pigList = pignoo.getList(Pig.class);
         List<Pig> pigs = pigList.getAll();// 查询
         System.out.println(pigs);
 
@@ -53,10 +53,10 @@ public class Test {
 
 Pignoo的核心思路是：用List与对象的操作取代数据库操作。操作对象，就等同于操作数据库。比如上面`newPig.setName("小猪改名");`满足了：
 
-- newPig是从PignooList中取出的
+- newPig是从PignooWriter中取出的
 - set操作修改了newPig的属性
 
-操作了PignooList中的对象等同于操作了数据库表中的数据。PignooList=SQL表，Object=SQL行。
+操作了PignooWriter中的对象等同于操作了数据库表中的数据。PignooWriter=SQL表，Object=SQL行。
 
 Pignoo是为了应对小型项目，尤其是面向API编程的时候，我们需要快速开发很多制式需求，后续还可能面临需求微调，能够快速理清源代码思路。为了解决这个场景，Pignoo将数据库操作转变成类似java.util.List的操作，整个开发周期无需关心SQL语句，只关注对象操作。
 
@@ -73,7 +73,7 @@ Pignoo是基于**标准JavaBean**、**JDBC**、**DataSource**、**Slf4j**、**Sp
 
 ## 不要以SQL操作的眼光看待Pignoo
 
-在使用PignooList时，请按照使用List的操作直觉来使用它。我来举一个例子：
+在使用PignooWriter时，请按照使用List的操作直觉来使用它。我来举一个例子：
 
 ```java
     pignoo.getList(Pig.class)
@@ -82,11 +82,11 @@ Pignoo是基于**标准JavaBean**、**JDBC**、**DataSource**、**Slf4j**、**Sp
         .getAll();// 查询最终结果是：先按Name字典序排序，同名时再按ID从小到大排序
 ```
 
-如果你还是在用SQL思路看待问题，你会认为上面代码是“先按ID排序，再按Name排序”。但设想一下，你如果是用同样的方式`.stream()`操作List，第二次排序时候，会将第一次的排序结果打乱！PignooList也是这个思路，最终结果会优先最后指定的排序规则。
+如果你还是在用SQL思路看待问题，你会认为上面代码是“先按ID排序，再按Name排序”。但设想一下，你如果是用同样的方式`.stream()`操作List，第二次排序时候，会将第一次的排序结果打乱！PignooWriter也是这个思路，最终结果会优先最后指定的排序规则。
 
 ## 动态代理用在哪里
 
-Pignoo中，有个很关键的设计思路：用List与对象的操作取代数据库操作。为了实现这个构想，从PignooList中取出的每个对象，都会增加一层代理，代理监听setter方法并执行SQL操作，从而达到对象操作等于数据操作的效果。这也是Pignoo牺牲性能，换取易用性的提现。
+Pignoo中，有个很关键的设计思路：用List与对象的操作取代数据库操作。为了实现这个构想，从PignooWriter中取出的每个对象，都会增加一层代理，代理监听setter方法并执行SQL操作，从而达到对象操作等于数据操作的效果。这也是Pignoo牺牲性能，换取易用性的提现。
 
 Pignoo的**作用域**外，setter的代理操作会失效。方便将对象传出Pignoo作用范围后，再做其他set操作，不会影响数据库。
 
@@ -143,8 +143,8 @@ Pignoo - 小黄人语的“无聊”。《卑鄙的我3》中小黄人们高呼�
 
 - **核心功能**：List与对象操作代替数据库操作的设计
 - 通过注解将JavaBean映射到单表
-- PignooList的过滤器
-- PignooList的排序功能
+- PignooWriter的过滤器
+- PignooWriter的排序功能
 - Pignoo的作用域控制
 - 基于MySQL语法的SQL生成（目前不支持其他SQL方言）
 - Pignoo自己的事务管理机制
@@ -155,7 +155,7 @@ v0.1.0注意事项：
 - Gru对象和数据源应一一对应
 - Pignoo不是单例的，Pignoo代表一次数据连接，关闭连接或将连接返回连接池时，Pignoo也随之关闭
 - Pignoo关闭时，也意味着退出了Pignoo作用域，代理对象setter方法操作数据库的功能随之失效
-- PignooList是延迟查询的，应用过滤、排序只会缓存当前查询方式，真正get时才会触发真正的查询，类似JDK8的Stream
+- PignooWriter是延迟查询的，应用过滤、排序只会缓存当前查询方式，真正get时才会触发真正的查询，类似JDK8的Stream
 - 在事务中的查询，会为查询加写锁，这样可以在先查后改的场景避免并发操作导致的一致性问题。易用性 > 性能
 - Pignoo不支持事务隔离级别设置、事务传播行为控制，Pignoo甚至不希望Web项目再有Service、Dao分层，拿来List就是干，简单的业务场景下没那么多嵌套
 - 如果你需要连接池、如果你需要事务传播行为，这些交给其他框架。例如Pignoo后续做了Spring事务控制的兼容，这些问题就由Spring来解决吧

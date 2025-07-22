@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * PignooReadList是Pignoo提供的读取用List，直接实现PignooReadList一般视为只读的List
+ * PignooReader是Pignoo提供的读取用List，直接实现PignooReader一般视为只读的List
  * <p>
- * PignooReadList is a read-only List provided by Pignoo. Directly implementing PignooReadList is generally regarded as a read-only List
+ * PignooReader is a read-only List provided by Pignoo. Directly implementing PignooReader is generally regarded as a read-only List
  * <p>
  * 只读List只提供读取功能
  * <p>
@@ -23,7 +23,7 @@ import java.util.function.Function;
  * @author xuesinuo
  * @since 0.2.3
  */
-public interface PignooReadList<E> {
+public interface PignooReader<E> {
 
     /**
      * 复制一个读写List（保持当前的查询条件）
@@ -34,7 +34,7 @@ public interface PignooReadList<E> {
      *         <p>
      *         The copied List
      */
-    PignooList<E> copyWriter();
+    PignooWriter<E> copyWriter();
 
     /**
      * 复制一个只读List（保持当前的查询条件）
@@ -45,12 +45,12 @@ public interface PignooReadList<E> {
      *         <p>
      *         The copied List
      */
-    PignooReadList<E> copyReader();
+    PignooReader<E> copyReader();
 
     /**
-     * 当前PignooList是否只读
+     * 当前PignooWriter是否只读
      * <p>
-     * Whether the current PignooList is read-only
+     * Whether the current PignooWriter is read-only
      * 
      * @return 是否只读
      *         <p>
@@ -123,7 +123,7 @@ public interface PignooReadList<E> {
      *         <p>
      *         The sorted list
      */
-    PignooReadList<E> sort(Function<E, ?> field, PignooSorter.SMode mode);
+    PignooReader<E> sort(Function<E, ?> field, PignooSorter.SMode mode);
 
     /**
      * 排序
@@ -137,7 +137,7 @@ public interface PignooReadList<E> {
      *         <p>
      *         The sorted list
      */
-    PignooReadList<E> sort(PignooSorter<E> sorter);
+    PignooReader<E> sort(PignooSorter<E> sorter);
 
     /**
      * 过滤
@@ -157,14 +157,14 @@ public interface PignooReadList<E> {
      *         <p>
      *         The filtered list
      */
-    PignooReadList<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values);
+    PignooReader<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values);
 
     /**
      * 请参考{@link #filter(Function, com.xuesinuo.pignoo.core.PignooFilter.FMode, Object...)}
      * <p>
      * Please refer to {@link #filter(Function, com.xuesinuo.pignoo.core.PignooFilter.FMode, Object...)}
      */
-    PignooReadList<E> filter(Function<E, ?> field, String mode, Object... values);
+    PignooReader<E> filter(Function<E, ?> field, String mode, Object... values);
 
     /**
      * 过滤
@@ -178,7 +178,7 @@ public interface PignooReadList<E> {
      *         <p>
      *         The filtered list
      */
-    PignooReadList<E> filter(PignooFilter<E> filter);
+    PignooReader<E> filter(PignooFilter<E> filter);
 
     /**
      * 过滤
@@ -192,7 +192,7 @@ public interface PignooReadList<E> {
      *         <p>
      *         The filtered list
      */
-    PignooReadList<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder);
+    PignooReader<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder);
 
     /**
      * 求和

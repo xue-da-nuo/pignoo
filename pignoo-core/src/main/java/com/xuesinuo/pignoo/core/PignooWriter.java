@@ -3,9 +3,9 @@ package com.xuesinuo.pignoo.core;
 import java.util.function.Function;
 
 /**
- * PignooList是Pignoo提供的List
+ * PignooWriter是Pignoo提供的List
  * <p>
- * PignooList is a List provided by Pignoo
+ * PignooWriter is a List provided by Pignoo
  * <p>
  * 特点1 - 基于SQL操作：对List的操作，会被转为SQL操作，从而实现对数据库的操作
  * <p>
@@ -16,9 +16,9 @@ import java.util.function.Function;
  * Features 2 - Lazy query: After filtering and sorting, the query will not be executed immediately, but the query conditions will be cached, and the query will be executed when the get method is
  * called
  * <p>
- * 特点3 - 筛选：筛选逻辑与{@link java.util.List}一致，可以把PignooList当成普通List用
+ * 特点3 - 筛选：筛选逻辑与{@link java.util.List}一致，可以把PignooWriter当成普通List用
  * <p>
- * Features 3 - Filter: The filtering logic is consistent with {@link java.util.List}, and you can treat PignooList as a normal List
+ * Features 3 - Filter: The filtering logic is consistent with {@link java.util.List}, and you can treat PignooWriter as a normal List
  * <p>
  * 特点4 - JavaBean代理：查询出的JavaBean会被代理，操作从List取出的JavaBean时，数据会保存到数据库
  * <p>
@@ -27,7 +27,7 @@ import java.util.function.Function;
  * @author xuesinuo
  * @since 0.1.0
  */
-public interface PignooList<E> extends PignooReadList<E> {
+public interface PignooWriter<E> extends PignooReader<E> {
     /**
      * 新增一条数据
      * <p>
@@ -124,21 +124,21 @@ public interface PignooList<E> extends PignooReadList<E> {
     long removeAll();
 
     @Override
-    PignooList<E> sort(Function<E, ?> field, PignooSorter.SMode mode);
+    PignooWriter<E> sort(Function<E, ?> field, PignooSorter.SMode mode);
 
     @Override
-    PignooList<E> sort(PignooSorter<E> sorter);
+    PignooWriter<E> sort(PignooSorter<E> sorter);
 
     @Override
-    PignooList<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values);
+    PignooWriter<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values);
 
     @Override
-    PignooList<E> filter(Function<E, ?> field, String mode, Object... values);
+    PignooWriter<E> filter(Function<E, ?> field, String mode, Object... values);
 
     @Override
-    PignooList<E> filter(PignooFilter<E> filter);
+    PignooWriter<E> filter(PignooFilter<E> filter);
 
     @Override
-    PignooList<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder);
+    PignooWriter<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder);
 
 }

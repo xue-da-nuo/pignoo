@@ -15,23 +15,22 @@ import java.util.stream.Collectors;
 import com.xuesinuo.pignoo.core.Pignoo;
 import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.PignooFilter;
-import com.xuesinuo.pignoo.core.PignooFilter.FMode;
-import com.xuesinuo.pignoo.core.PignooList;
+import com.xuesinuo.pignoo.core.PignooWriter;
 import com.xuesinuo.pignoo.core.PignooSorter;
 import com.xuesinuo.pignoo.core.entity.EntityProxyFactory;
 import com.xuesinuo.pignoo.core.entity.SqlParam;
 
 /**
- * 基于MySQL语法实现的{@link PignooList}
+ * 基于MySQL语法实现的{@link PignooWriter}
  * 
  * @author xuesinuo
  * @since 0.1.0
  */
-public class MySqlPignooList<E> extends MySqlPignooReadOnlyList<E> implements PignooList<E> {
+public class MySqlPignooWriter<E> extends MySqlPignooReadOnlyList<E> implements PignooWriter<E> {
 
     private final EntityProxyFactory<E> entityProxyFactory;
 
-    public MySqlPignooList(Pignoo pignoo, Supplier<Connection> connGetter, Consumer<Connection> connCloser, boolean inTransaction, Class<E> c, PignooConfig config) {
+    public MySqlPignooWriter(Pignoo pignoo, Supplier<Connection> connGetter, Consumer<Connection> connCloser, boolean inTransaction, Class<E> c, PignooConfig config) {
         super(pignoo, connGetter, connCloser, inTransaction, c, config);
 
         this.entityProxyFactory = new EntityProxyFactory<>(c, entityMapper, (index, arg, e) -> {
@@ -347,37 +346,37 @@ public class MySqlPignooList<E> extends MySqlPignooReadOnlyList<E> implements Pi
     }
 
     @Override
-    public PignooList<E> sort(Function<E, ?> field, PignooSorter.SMode mode) {
+    public PignooWriter<E> sort(Function<E, ?> field, PignooSorter.SMode mode) {
         super.sort(field, mode);
         return this;
     }
 
     @Override
-    public PignooList<E> sort(PignooSorter<E> sorter) {
+    public PignooWriter<E> sort(PignooSorter<E> sorter) {
         super.sort(sorter);
         return this;
     }
 
     @Override
-    public PignooList<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values) {
+    public PignooWriter<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values) {
         super.filter(field, mode, values);
         return this;
     }
 
     @Override
-    public PignooList<E> filter(Function<E, ?> field, String mode, Object... values) {
+    public PignooWriter<E> filter(Function<E, ?> field, String mode, Object... values) {
         super.filter(field, mode, values);
         return this;
     }
 
     @Override
-    public PignooList<E> filter(PignooFilter<E> filter) {
+    public PignooWriter<E> filter(PignooFilter<E> filter) {
         super.filter(filter);
         return this;
     }
 
     @Override
-    public PignooList<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder) {
+    public PignooWriter<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder) {
         super.filter(filterBuilder);
         return this;
     }

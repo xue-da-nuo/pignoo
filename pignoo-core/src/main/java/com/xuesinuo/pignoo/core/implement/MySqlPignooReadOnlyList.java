@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import com.xuesinuo.pignoo.core.Pignoo;
 import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.PignooFilter;
-import com.xuesinuo.pignoo.core.PignooList;
-import com.xuesinuo.pignoo.core.PignooReadList;
+import com.xuesinuo.pignoo.core.PignooWriter;
+import com.xuesinuo.pignoo.core.PignooReader;
 import com.xuesinuo.pignoo.core.PignooSorter;
 import com.xuesinuo.pignoo.core.SqlExecuter;
 import com.xuesinuo.pignoo.core.PignooFilter.FMode;
@@ -24,12 +24,12 @@ import com.xuesinuo.pignoo.core.entity.EntityMapper;
 import com.xuesinuo.pignoo.core.entity.SqlParam;
 
 /**
- * 基于MySQL语法实现的{@link PignooReadList}
+ * 基于MySQL语法实现的{@link PignooReader}
  * 
  * @author xuesinuo
  * @since 0.2.3
  */
-public class MySqlPignooReadOnlyList<E> implements PignooReadList<E> {
+public class MySqlPignooReadOnlyList<E> implements PignooReader<E> {
 
     protected static final SqlExecuter sqlExecuter = SimpleJdbcSqlExecuter.getInstance();
 
@@ -54,19 +54,19 @@ public class MySqlPignooReadOnlyList<E> implements PignooReadList<E> {
     }
 
     @Override
-    public PignooList<E> copyWriter() {
-        MySqlPignooList<E> pignooList = new MySqlPignooList<>(pignoo, connGetter, connCloser, inTransaction, c, config);
-        pignooList.filter = PignooFilter.copy(filter);
-        pignooList.sorter = PignooSorter.copy(sorter);
-        return pignooList;
+    public PignooWriter<E> copyWriter() {
+        MySqlPignooWriter<E> pignooWriter = new MySqlPignooWriter<>(pignoo, connGetter, connCloser, inTransaction, c, config);
+        pignooWriter.filter = PignooFilter.copy(filter);
+        pignooWriter.sorter = PignooSorter.copy(sorter);
+        return pignooWriter;
     }
 
     @Override
-    public PignooReadList<E> copyReader() {
-        MySqlPignooReadOnlyList<E> pignooList = new MySqlPignooReadOnlyList<>(pignoo, connGetter, connCloser, inTransaction, c, config);
-        pignooList.filter = PignooFilter.copy(filter);
-        pignooList.sorter = PignooSorter.copy(sorter);
-        return pignooList;
+    public PignooReader<E> copyReader() {
+        MySqlPignooReadOnlyList<E> pignooWriter = new MySqlPignooReadOnlyList<>(pignoo, connGetter, connCloser, inTransaction, c, config);
+        pignooWriter.filter = PignooFilter.copy(filter);
+        pignooWriter.sorter = PignooSorter.copy(sorter);
+        return pignooWriter;
     }
 
     protected String fmodeToSql(FMode fmode) {
@@ -298,7 +298,7 @@ public class MySqlPignooReadOnlyList<E> implements PignooReadList<E> {
     }
 
     @Override
-    public PignooReadList<E> sort(Function<E, ?> field, PignooSorter.SMode mode) {
+    public PignooReader<E> sort(Function<E, ?> field, PignooSorter.SMode mode) {
         if (this.sorter == null) {
             this.sorter = PignooSorter.build(field, mode);
         } else {
@@ -308,7 +308,7 @@ public class MySqlPignooReadOnlyList<E> implements PignooReadList<E> {
     }
 
     @Override
-    public PignooReadList<E> sort(PignooSorter<E> sorter) {
+    public PignooReader<E> sort(PignooSorter<E> sorter) {
         if (this.sorter == null) {
             this.sorter = sorter;
         } else {
@@ -318,7 +318,7 @@ public class MySqlPignooReadOnlyList<E> implements PignooReadList<E> {
     }
 
     @Override
-    public PignooReadList<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values) {
+    public PignooReader<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values) {
         if (this.filter == null) {
             this.filter = PignooFilter.build(field, mode, values);
         } else {
@@ -328,12 +328,12 @@ public class MySqlPignooReadOnlyList<E> implements PignooReadList<E> {
     }
 
     @Override
-    public PignooReadList<E> filter(Function<E, ?> field, String mode, Object... values) {
+    public PignooReader<E> filter(Function<E, ?> field, String mode, Object... values) {
         return filter(field, FMode.getFMode(mode), values);
     }
 
     @Override
-    public PignooReadList<E> filter(PignooFilter<E> filter) {
+    public PignooReader<E> filter(PignooFilter<E> filter) {
         if (this.filter == null) {
             this.filter = filter;
         } else {
@@ -343,7 +343,7 @@ public class MySqlPignooReadOnlyList<E> implements PignooReadList<E> {
     }
 
     @Override
-    public PignooReadList<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder) {
+    public PignooReader<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder) {
         PignooFilter<E> filter = new PignooFilter<>();
         filter = filterBuilder.apply(filter);
         if (filter == null) {

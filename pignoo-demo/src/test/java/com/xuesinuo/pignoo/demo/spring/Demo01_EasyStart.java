@@ -24,7 +24,7 @@ public class Demo01_EasyStart {
 
     @Test
     public void add() {
-        var pigList = pignoo.getList(Pig.class);
+        var pigList = pignoo.writer(Pig.class);
         Pig pig = new Pig();
         pig.setName("新猪报道");
         pig.setPigWeight(new BigDecimal("10.2"));
@@ -36,7 +36,7 @@ public class Demo01_EasyStart {
 
     @Test
     public void update() {
-        var pigList = pignoo.getList(Pig.class);
+        var pigList = pignoo.writer(Pig.class);
         Pig pig = pigList.filter(Pig::getId, "==", 1).getOne();
         if (pig != null) {
             pig.setName("小猪改名");
@@ -45,13 +45,13 @@ public class Demo01_EasyStart {
 
     @Test
     public void delete() {
-        var pigList = pignoo.getList(Pig.class);
+        var pigList = pignoo.writer(Pig.class);
         pigList.filter(Pig::getId, "==", 10).removeAll();
     }
 
     @Test
     public void query() {
-        var pigList = pignoo.getList(Pig.class);
+        var pigList = pignoo.writer(Pig.class);
         List<Pig> pigs = pigList.filter(Pig::getId, "==", 1).getAll();
         System.out.println(pigs);
     }

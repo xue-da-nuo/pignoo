@@ -9,8 +9,8 @@ import javax.sql.DataSource;
 
 import com.xuesinuo.pignoo.core.Pignoo;
 import com.xuesinuo.pignoo.core.PignooConfig;
-import com.xuesinuo.pignoo.core.PignooList;
-import com.xuesinuo.pignoo.core.PignooReadList;
+import com.xuesinuo.pignoo.core.PignooWriter;
+import com.xuesinuo.pignoo.core.PignooReader;
 import com.xuesinuo.pignoo.core.config.DatabaseEngine;
 
 /**
@@ -98,16 +98,16 @@ public class TransactionPignoo implements Pignoo {
     private Consumer<Connection> connCloser = (conn) -> {};
 
     @Override
-    public <E> PignooList<E> getList(Class<E> c) {
+    public <E> PignooWriter<E> writer(Class<E> c) {
         switch (this.config.getEngine()) {
         case MySQL:
-            return new MySqlPignooList<E>(this, connGetter, connCloser, true, c, this.config);
+            return new MySqlPignooWriter<E>(this, connGetter, connCloser, true, c, this.config);
         }
         throw new RuntimeException("Unknow database engine");
     }
 
     @Override
-    public <E> PignooReadList<E> readList(Class<E> c) {
+    public <E> PignooReader<E> reader(Class<E> c) {
         switch (this.config.getEngine()) {
         case MySQL:
             return new MySqlPignooReadOnlyList<E>(this, connGetter, connCloser, true, c, this.config);

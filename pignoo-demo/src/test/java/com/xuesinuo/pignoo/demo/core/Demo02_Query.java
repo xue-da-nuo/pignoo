@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.xuesinuo.pignoo.core.Pignoo;
-import com.xuesinuo.pignoo.core.PignooList;
+import com.xuesinuo.pignoo.core.PignooWriter;
 import com.xuesinuo.pignoo.core.PignooFilter.FMode;
 import com.xuesinuo.pignoo.core.PignooSorter.SMode;
 import com.xuesinuo.pignoo.core.implement.BasePignoo;
@@ -33,7 +33,7 @@ public class Demo02_Query {
      */
     @Test
     public void filters() {
-        PignooList<Pig> pigList = pignoo.getList(Pig.class);
+        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
 
         pigList.filter(Pig::getName, "like", "新猪报道%");
         pigList.getAll();// name like '新猪报道%'
@@ -46,9 +46,9 @@ public class Demo02_Query {
      * 使用List的赋值，可以生成多个List分别使用
      */
     public void useCopy() {
-        PignooList<Pig> list1 = pignoo.getList(Pig.class);
+        PignooWriter<Pig> list1 = pignoo.writer(Pig.class);
         list1.filter(Pig::getAge, ">", 10);
-        PignooList<Pig> list2 = list1.copyWriter();
+        PignooWriter<Pig> list2 = list1.copyWriter();
         list1.filter(Pig::getId, "<=", 10);
         list2.filter(Pig::getId, ">", 10);
 
@@ -67,7 +67,7 @@ public class Demo02_Query {
      */
     @Test
     public void multiFilter() {
-        PignooList<Pig> pigList = pignoo.getList(Pig.class);
+        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
         pigList.sort(Pig::getAge, SMode.MAX_FIRST);// 先按年龄降序排序
         pigList.filter(Pig::getColor, "like", "%黑%");// 【单条件筛选】仅保留了名字中包含黑字的
         pigList.filter(f -> f.or(Pig::getId, ">", 10).or(Pig::getId, "<", 2));// 【组合筛选】在前一步的基础上，保留了id大于10或小于2的
@@ -80,7 +80,7 @@ public class Demo02_Query {
      */
     @Test
     public void filterMode4Enum() {
-        PignooList<Pig> pigList = pignoo.getList(Pig.class);
+        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
         /*
          * 各类查询条件
          */
@@ -123,11 +123,11 @@ public class Demo02_Query {
      * <p>
      * 实际上，别名不区分大小写{@link java.lang.String#toLowerCase()}，别名会忽略两段空白字符{@link java.lang.String#trim()}
      * <p>
-     * 附：list的sort和filter链式调用，意味着调用返回结果是PignooList。注意：调用会对原List生效，无论是否赋值，原list都被更改了！
+     * 附：list的sort和filter链式调用，意味着调用返回结果是PignooWriter。注意：调用会对原List生效，无论是否赋值，原list都被更改了！
      */
     @Test
     public void filterMode4String() {
-        PignooList<Pig> list = pignoo.getList(Pig.class);
+        PignooWriter<Pig> list = pignoo.writer(Pig.class);
 
         list = list.filter(Pig::getAge, "==", 1)// “list = ”赋值是不必要的
                 .filter(Pig::getAge, "!=", 1)
@@ -145,11 +145,11 @@ public class Demo02_Query {
     }
 
     /**
-     * 从PignooList中获取
+     * 从PignooWriter中获取
      */
     @Test
     public void getSome() {
-        PignooList<Pig> pigList = pignoo.getList(Pig.class);
+        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
         pigList.filter(Pig::getId, ">", 10);
 
         pigList.get(5, 10);// id>10的数据，跳过前5个，查询10个
@@ -163,7 +163,7 @@ public class Demo02_Query {
      */
     @Test
     public void getSum() {
-        PignooList<Pig> pigList = pignoo.getList(Pig.class);
+        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
         System.out.println(pigList.size());// 求总数
         System.out.println(pigList.sum(Pig::getId, Long.class));// 求和
         System.out.println(pigList.avg(Pig::getAge, Integer.class));// 求平均

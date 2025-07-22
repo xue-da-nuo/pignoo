@@ -10,8 +10,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import com.xuesinuo.pignoo.core.Pignoo;
 import com.xuesinuo.pignoo.core.PignooConfig;
-import com.xuesinuo.pignoo.core.PignooList;
-import com.xuesinuo.pignoo.core.PignooReadList;
+import com.xuesinuo.pignoo.core.PignooWriter;
+import com.xuesinuo.pignoo.core.PignooReader;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,13 +91,13 @@ public class SpringPignoo implements Pignoo {
     }
 
     @Override
-    public <E> PignooList<E> getList(Class<E> c) {
-        return this.getPignoo().getList(c);
+    public <E> PignooWriter<E> writer(Class<E> c) {
+        return this.getPignoo().writer(c);
     }
 
     @Override
-    public <E> PignooReadList<E> readList(Class<E> c) {
-        return this.getPignoo().readList(c);
+    public <E> PignooReader<E> reader(Class<E> c) {
+        return this.getPignoo().reader(c);
     }
 
     private SpringPignooItem getPignoo() {
