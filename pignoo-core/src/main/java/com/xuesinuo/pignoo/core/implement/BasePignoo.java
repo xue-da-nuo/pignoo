@@ -28,6 +28,8 @@ public class BasePignoo implements Pignoo {
 
     private DataSource dataSource;// 数据源
 
+    private Connection conn;// 数据库连接
+
     private boolean hasClosed = false;// 是否已经关闭
 
     /**
@@ -60,9 +62,16 @@ public class BasePignoo implements Pignoo {
             this.config = pignooConfig.copy();
         }
         if (this.config.getEngine() == null) {
-            try (Connection conn = dataSource.getConnection()) {
-                this.config.setEngine(DatabaseEngine.getDatabaseEngineByConnection(conn));
+            try {
+                this.config.setEngine(DatabaseEngine.getDatabaseEngineByConnection(this.getConnection()));
             } catch (SQLException e) {
+                if (this.conn != null) {
+                    try {
+                        this.conn.close();
+                    } catch (SQLException e1) {
+                        log.error("Open connection error, and then close connection error", e1);
+                    }
+                }
                 throw new RuntimeException(e);
             }
         }
@@ -75,34 +84,26 @@ public class BasePignoo implements Pignoo {
         if (hasClosed) {
             throw new RuntimeException("Pignoo has closed, can not get connection");
         }
-        try {
-            return this.dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        if (this.conn == null) {
+            try {
+                this.conn = this.dataSource.getConnection();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
+        return this.conn;
     }
 
     private Supplier<Connection> connGetter = () -> this.getConnection();
 
     private Consumer<Connection> connCloser = (conn) -> {
-        Exception e = null;
         try {
             if (conn.getAutoCommit() == false) {
                 conn.commit();
             }
         } catch (Exception ex) {
             log.error("Connection commit error", ex);
-            e = ex;
-        } finally {
-            try {
-                conn.close();
-            } catch (Exception ex) {
-                log.error("Connection close error", ex);
-                e = ex;
-            }
-        }
-        if (e != null) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(ex);
         }
     };
 
@@ -119,6 +120,15 @@ public class BasePignoo implements Pignoo {
     public void close() {
         this.hasClosed = true;
         this.dataSource = null;
+        if (this.conn != null) {
+            try {
+                this.conn.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } finally {
+                this.conn = null;
+            }
+        }
     }
 
     @Override

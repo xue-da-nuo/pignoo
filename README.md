@@ -8,7 +8,7 @@ Pignoo是一个应对大部分小型Java项目的轻量JDBC框架。
 <dependency>
     <groupId>com.xuesinuo</groupId>
     <artifactId>pignoo-core</artifactId>
-    <version>0.1.1</version>
+    <version>0.2.1</version>
 </dependency>
 ```
 
@@ -69,7 +69,7 @@ Pignoo是基于**标准JavaBean**、**JDBC**、**DataSource**、**Slf4j**、**Sp
 - DataSource：Pignoo不提供DataSource的构建，需要使用者提供一个DataSource，当然推荐DataSource可以是通过连接池构建的。
 - Slf4j：Pignoo的日志是基于Slf4j的，例如输出com.xuesinuo.pignoo下的debug日志可以看到SQL执行情况。
 - SpringAOP：Pignoo中用到了CGLIB动态代理，SpringAOP作为优秀的AOP框架，Pignoo基于它实现的动态代理。
-- JDK17：目前版本基于SpringAOP6.2.8，所以需要最低JDK17的支持。但其实Pignoo没有用到很新的特性。如果你很需要，可以issue+邮件来催促降低JDK版本。
+- JDK21：其实Pignoo没有用到很新的特性。如果你很需要，可以issue+邮件来催促降低JDK版本。
 
 ## 不要以SQL操作的眼光看待Pignoo
 
@@ -110,6 +110,14 @@ Pignoo - 小黄人语的“无聊”。《卑鄙的我3》中小黄人们高呼�
         pignoo.getList(Pig.class).getOne().setName("新名字");
     });
 ```
+
+## v0.2.1
+
+做出如下更新：
+
+- SQL执行器使用connGetter与connCloser来进行连接的关闭，实际关闭逻辑由连接提供者（Pignoo实现）决定
+- Spring事务管理对接完成
+- pignoo关闭时，释放掉与数据库连接、数据源的指针，可以在Pignoo对象未销毁的情况下，允许回收连接资源
 
 ## v0.2.0
 
