@@ -38,14 +38,14 @@
   <parent>
     <groupId>com.xuesinuo</groupId>
     <artifactId>pignoo</artifactId>
-    <version>0.2.3</version>
+    <version>0.2.4</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>com.xuesinuo</groupId>
       <artifactId>pignoo-core</artifactId>
-      <version>0.2.3</version>
+      <version>0.2.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

@@ -8,7 +8,7 @@ Pignoo是一个应对大部分小型Java项目的轻量JDBC框架。
 <dependency>
     <groupId>com.xuesinuo</groupId>
     <artifactId>pignoo-core</artifactId>
-    <version>0.2.3</version>
+    <version>0.2.4</version>
 </dependency>
 ```
 
@@ -110,6 +110,13 @@ Pignoo - 小黄人语的“无聊”。《卑鄙的我3》中小黄人们高呼�
         pignoo.writer(Pig.class).getOne().setName("新名字");
     });
 ```
+
+## v0.2.4
+
+做出如下更新：
+
+- 增加了Gru的Consumer、Function重载
+- 完善了许多Java Doc
 
 ## v0.2.3
 
