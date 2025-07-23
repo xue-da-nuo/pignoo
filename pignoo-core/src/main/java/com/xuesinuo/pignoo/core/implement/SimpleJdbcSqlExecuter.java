@@ -34,7 +34,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
      * 单例的实现
      * <p>
      * Singleton implementation
-     * 
+     *
      * @return SQL执行器
      *         <p>
      *         SQL executer

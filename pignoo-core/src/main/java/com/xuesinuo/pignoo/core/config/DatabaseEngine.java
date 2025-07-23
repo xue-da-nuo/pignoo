@@ -61,9 +61,9 @@ public enum DatabaseEngine {
      * @return 数据库引擎枚举
      *         <p>
      *         Database engine enum
-     * @throws SQLException SQL异常
-     *                      <p>
-     *                      SQL exception
+     * @throws java.sql.SQLException SQL异常
+     *                               <p>
+     *                               SQL exception
      */
     public static DatabaseEngine getDatabaseEngineByConnection(Connection conn) throws SQLException {
         if (conn == null || conn.getMetaData() == null) {
