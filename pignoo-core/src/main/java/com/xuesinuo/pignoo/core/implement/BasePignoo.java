@@ -18,6 +18,12 @@ import com.xuesinuo.pignoo.core.config.DatabaseEngine;
 
 /**
  * 基础的Pignoo实现
+ * <p>
+ * Basic Pignoo implementation
+ * <p>
+ * 继续单线程下，单一数据库连接，允许多次使用连接，退出则关闭连接（返还连接池）
+ * <p>
+ * Continue to single thread, single database connection, allow multiple use of connections, exit to close the connection (return to the connection pool)
  * 
  * @author xuesinuo
  * @since 0.1.0

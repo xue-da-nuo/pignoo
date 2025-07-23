@@ -22,6 +22,22 @@ import com.xuesinuo.pignoo.spring.config.PignooTransactionSynchronizationAdapter
  * 用于SpringBean的Pignoo实现，本质是一个线程化的PignooBean代理。
  * <p>
  * Pignoo implementation for SpringBean, essentially a threadized PignooBean proxy.
+ * <p>
+ * 融入Spirng时，只需正确构造SpringPignoo，并注入Spring容器中即可。
+ * <p>
+ * When integrated into Spirng, just construct SpringPignoo correctly and inject it into the Spring container.
+ * <p>
+ * 
+ * <pre>
+ * // Example:
+ * &#64;Configuration
+ * public class SpringPignooConfig {
+ *     &#64;Bean
+ *     Pignoo pignoo(&#64;Autowired DataSource dataSource) {
+ *         return new SpringPignoo(dataSource);
+ *     }
+ * }
+ * </pre>
  * 
  * @author xuesinuo
  * @since 0.2.1
@@ -136,7 +152,8 @@ public class SpringPignoo implements Pignoo {
         }
         transactionPignooThreadLocal.remove();
         transactionPignooThreadLocalFlag.remove();
-        log.debug("Once Pignoo-Spring transaction finished!");
+        log.debug("一次Spring-Pignoo事务完成了，并正确得回收了资源！");
+        log.debug("Once Spring-Pignoo transaction finished!");
     }
 
     @Override
@@ -144,7 +161,8 @@ public class SpringPignoo implements Pignoo {
         this.basePignoo.close();
         this.hasClosed = true;
         this.dataSource = null;
-        log.warn("Pignoo-Spring closed! Please confirm that the SpringIoC container is also closed, otherwise this is an abnormal shutdown!");
+        log.warn("Spring-Pignoo 被关闭了！请确认SpringIoC容器也正在关闭，否则这是一次错误的Spring-Pignoo关闭！");
+        log.warn("Spring-Pignoo closed! Please confirm that the SpringIoC container is also closed, otherwise this is an abnormal shutdown!");
     }
 
     @Override

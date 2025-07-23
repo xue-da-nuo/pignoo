@@ -8,9 +8,9 @@ import com.xuesinuo.pignoo.core.config.PrimaryKeyNamingConvention;
 import lombok.Data;
 
 /**
- * Pignoo配置
+ * Pignoo的配置
  * <p>
- * Pignoo configuration
+ * Pignoo's configuration
  * 
  * @author xuesinuo
  * @since 0.1.0

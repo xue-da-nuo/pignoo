@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 原生JDBC的{@SqlExecuter}实现
+ * <p>
+ * Naive JDBC {@SqlExecuter} implementation
  * 
  * @author xuesinuo
  * @since 0.1.0

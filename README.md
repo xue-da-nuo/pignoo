@@ -31,16 +31,16 @@ public class Test {
     private Pignoo pignoo = new BasePignoo(Test.dataSource);// 使用数据源，可以构建一个Pignoo实例，我们就用它来操作数据库
 
     public void test() {
-        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
-        List<Pig> pigs = pigList.getAll();// 查询
+        PignooWriter<Pig> writer = pignoo.writer(Pig.class);
+        List<Pig> pigs = writer.getAll();// 查询
         System.out.println(pigs);
 
         new Pig(null, "新的小猪");
-        Pig newPig = pigList.add(pig);// 新增
+        Pig newPig = writer.add(pig);// 新增
 
         newPig.setName("小猪改名");// 修改
 
-        pigList.filter(Pig::getId, "==", newPig.getId()).removeAll();// 删除
+        writer.filter(Pig::getId, "==", newPig.getId()).removeAll();// 删除
     }
 }
 ```
@@ -102,7 +102,7 @@ Pignoo - 小黄人语的“无聊”。《卑鄙的我3》中小黄人们高呼�
 真的把Pignoo付诸于实践，代码大概是这样：
 
 ```java
-    List<Pig> pigList = gru.run(pignoo -> {// 非事务操作
+    List<Pig> writer = gru.run(pignoo -> {// 非事务操作
         return pignoo.reader(Pig.class).getAll();
     });
 

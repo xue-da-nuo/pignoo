@@ -10,7 +10,7 @@ import com.xuesinuo.pignoo.core.Pignoo;
 import com.xuesinuo.pignoo.spring.implement.SpringPignoo;
 
 @Configuration
-public class SpringConfig {
+public class SpringPignooConfig {
     @Bean
     Pignoo pignoo(@Autowired DataSource dataSource) {
         return new SpringPignoo(dataSource);

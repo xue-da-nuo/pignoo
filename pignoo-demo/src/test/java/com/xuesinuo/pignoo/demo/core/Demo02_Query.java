@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.xuesinuo.pignoo.core.Pignoo;
-import com.xuesinuo.pignoo.core.PignooWriter;
 import com.xuesinuo.pignoo.core.PignooFilter.FMode;
 import com.xuesinuo.pignoo.core.PignooSorter.SMode;
 import com.xuesinuo.pignoo.core.implement.BasePignoo;
@@ -33,22 +32,22 @@ public class Demo02_Query {
      */
     @Test
     public void filters() {
-        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
+        var reader = pignoo.reader(Pig.class);
 
-        pigList.filter(Pig::getName, "like", "新猪报道%");
-        pigList.getAll();// name like '新猪报道%'
+        reader.filter(Pig::getName, "like", "新猪报道%");
+        reader.getAll();// name like '新猪报道%'
 
-        pigList.filter(Pig::getId, ">", 10L);
-        pigList.getAll();// name like '新猪报道%', and then id > 10
+        reader.filter(Pig::getId, ">", 10L);
+        reader.getAll();// name like '新猪报道%', and then id > 10
     }
 
     /**
      * 使用List的赋值，可以生成多个List分别使用
      */
     public void useCopy() {
-        PignooWriter<Pig> list1 = pignoo.writer(Pig.class);
+        var list1 = pignoo.reader(Pig.class);
         list1.filter(Pig::getAge, ">", 10);
-        PignooWriter<Pig> list2 = list1.copyWriter();
+        var list2 = list1.copyWriter();
         list1.filter(Pig::getId, "<=", 10);
         list2.filter(Pig::getId, ">", 10);
 
@@ -67,12 +66,12 @@ public class Demo02_Query {
      */
     @Test
     public void multiFilter() {
-        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
-        pigList.sort(Pig::getAge, SMode.MAX_FIRST);// 先按年龄降序排序
-        pigList.filter(Pig::getColor, "like", "%黑%");// 【单条件筛选】仅保留了名字中包含黑字的
-        pigList.filter(f -> f.or(Pig::getId, ">", 10).or(Pig::getId, "<", 2));// 【组合筛选】在前一步的基础上，保留了id大于10或小于2的
-        pigList.sort(Pig::getId, SMode.MIN_FIRST);// 再按id升序排序，这时候排序完，年龄就不一定是降序了，因为这一步仅按id排序！id相同的猪之间还是会按照先前的年龄排序。
-        pigList.getAll();
+        var reader = pignoo.reader(Pig.class);
+        reader.sort(Pig::getAge, SMode.MAX_FIRST);// 先按年龄降序排序
+        reader.filter(Pig::getColor, "like", "%黑%");// 【单条件筛选】仅保留了名字中包含黑字的
+        reader.filter(f -> f.or(Pig::getId, ">", 10).or(Pig::getId, "<", 2));// 【组合筛选】在前一步的基础上，保留了id大于10或小于2的
+        reader.sort(Pig::getId, SMode.MIN_FIRST);// 再按id升序排序，这时候排序完，年龄就不一定是降序了，因为这一步仅按id排序！id相同的猪之间还是会按照先前的年龄排序。
+        reader.getAll();
     }
 
     /**
@@ -80,40 +79,40 @@ public class Demo02_Query {
      */
     @Test
     public void filterMode4Enum() {
-        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
+        var reader = pignoo.reader(Pig.class);
         /*
          * 各类查询条件
          */
-        pigList.filter(Pig::getAge, FMode.EQ, 1);// 相等，只能跟1个参数
-        pigList.filter(Pig::getAge, FMode.NE, 1);// 不相等，只能跟1个参数
-        pigList.filter(Pig::getAge, FMode.GT, 1);// 大于，只能跟1个参数
-        pigList.filter(Pig::getAge, FMode.LT, 1);// 小于，只能跟1个参数
-        pigList.filter(Pig::getAge, FMode.GE, 1);// 大于等于，只能跟1个参数
-        pigList.filter(Pig::getAge, FMode.LE, 1);// 小于等于，只能跟1个参数
-        pigList.filter(Pig::getName, FMode.LIKE, "新猪报道%");// like，只能跟1个参数
-        pigList.filter(Pig::getName, FMode.NOT_LIKE, "新猪报道%");// not like，只能跟1个参数
-        pigList.filter(Pig::getAge, FMode.IN, 1, 2, 3);// in，可以跟多个参数
-        pigList.filter(Pig::getAge, FMode.NOT_IN, 1, 2, 3);// not in，可以跟多个参数
+        reader.filter(Pig::getAge, FMode.EQ, 1);// 相等，只能跟1个参数
+        reader.filter(Pig::getAge, FMode.NE, 1);// 不相等，只能跟1个参数
+        reader.filter(Pig::getAge, FMode.GT, 1);// 大于，只能跟1个参数
+        reader.filter(Pig::getAge, FMode.LT, 1);// 小于，只能跟1个参数
+        reader.filter(Pig::getAge, FMode.GE, 1);// 大于等于，只能跟1个参数
+        reader.filter(Pig::getAge, FMode.LE, 1);// 小于等于，只能跟1个参数
+        reader.filter(Pig::getName, FMode.LIKE, "新猪报道%");// like，只能跟1个参数
+        reader.filter(Pig::getName, FMode.NOT_LIKE, "新猪报道%");// not like，只能跟1个参数
+        reader.filter(Pig::getAge, FMode.IN, 1, 2, 3);// in，可以跟多个参数
+        reader.filter(Pig::getAge, FMode.NOT_IN, 1, 2, 3);// not in，可以跟多个参数
 
         /**
          * 集合的用法：支持Iterable（Collection、List、Set）和Array。 除Iterable和Array外，其他参数都视为单一元素
          */
         Collection<Long> ids1 = List.of(1L, 2L, 3L);
         long[] ids2 = new long[] { 4L, 5L, 6L };
-        pigList.filter(Pig::getId, FMode.IN, ids1, ids2, 6, 7, null);// in，可以集合、元素混用，支持null
-        pigList.filter(Pig::getId, FMode.NOT_IN, ids1, ids2, 6, 7);// not in，可以集合、元素混用，支持null
+        reader.filter(Pig::getId, FMode.IN, ids1, ids2, 6, 7, null);// in，可以集合、元素混用，支持null
+        reader.filter(Pig::getId, FMode.NOT_IN, ids1, ids2, 6, 7);// not in，可以集合、元素混用，支持null
 
         /**
          * IS NULL的判断
          */
         Integer id = null;
-        pigList.filter(Pig::getId, FMode.EQ, id);// 相等，支持null
-        pigList.filter(Pig::getId, FMode.NE, id);// 不相等，支持null
-        // pigList.filter(Pig::getId, FMode.EQ, null);// 不可直接赋值null，JRE会提示警告：null无法做为可变数组入参，建议使用NULL、NOT_NULL
-        pigList.filter(Pig::getId, FMode.NULL);
-        pigList.filter(Pig::getId, FMode.NOT_NULL);
+        reader.filter(Pig::getId, FMode.EQ, id);// 相等，支持null
+        reader.filter(Pig::getId, FMode.NE, id);// 不相等，支持null
+        // reader.filter(Pig::getId, FMode.EQ, null);// 不可直接赋值null，JRE会提示警告：null无法做为可变数组入参，建议使用NULL、NOT_NULL
+        reader.filter(Pig::getId, FMode.NULL);
+        reader.filter(Pig::getId, FMode.NOT_NULL);
 
-        pigList.getAll();
+        reader.getAll();
     }
 
     /**
@@ -127,7 +126,7 @@ public class Demo02_Query {
      */
     @Test
     public void filterMode4String() {
-        PignooWriter<Pig> list = pignoo.writer(Pig.class);
+        var list = pignoo.reader(Pig.class);
 
         list = list.filter(Pig::getAge, "==", 1)// “list = ”赋值是不必要的
                 .filter(Pig::getAge, "!=", 1)
@@ -149,13 +148,13 @@ public class Demo02_Query {
      */
     @Test
     public void getSome() {
-        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
-        pigList.filter(Pig::getId, ">", 10);
+        var reader = pignoo.reader(Pig.class);
+        reader.filter(Pig::getId, ">", 10);
 
-        pigList.get(5, 10);// id>10的数据，跳过前5个，查询10个
-        pigList.getAll();// id>10的数据，查询全部
+        reader.get(5, 10);// id>10的数据，跳过前5个，查询10个
+        reader.getAll();// id>10的数据，查询全部
 
-        pigList.getOne();// id>10的数据，查询第一个，直接拿到对象，可能为NULL
+        reader.getOne();// id>10的数据，查询第一个，直接拿到对象，可能为NULL
     }
 
     /**
@@ -163,12 +162,12 @@ public class Demo02_Query {
      */
     @Test
     public void getSum() {
-        PignooWriter<Pig> pigList = pignoo.writer(Pig.class);
-        System.out.println(pigList.size());// 求总数
-        System.out.println(pigList.sum(Pig::getId, Long.class));// 求和
-        System.out.println(pigList.avg(Pig::getAge, Integer.class));// 求平均
+        var reader = pignoo.reader(Pig.class);
+        System.out.println(reader.size());// 求总数
+        System.out.println(reader.sum(Pig::getId, Long.class));// 求和
+        System.out.println(reader.avg(Pig::getAge, Integer.class));// 求平均
 
-        pigList.filter(Pig::getId, ">", 3);
-        System.out.println(pigList.size());
+        reader.filter(Pig::getId, ">", 3);
+        System.out.println(reader.size());
     }
 }

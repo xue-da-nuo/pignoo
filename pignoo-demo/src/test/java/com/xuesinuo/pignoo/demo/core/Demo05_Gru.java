@@ -22,10 +22,10 @@ public class Demo05_Gru {
     @Test
     public void noTransactional() {
         Pig newPig = gru.run(pignoo -> {// 这是pignoo的作用域，除了作用域，pignoo不再生效
-            var pigList = pignoo.writer(Pig.class);
+            var writer = pignoo.writer(Pig.class);
             Pig pig = new Pig();
             pig.setName("新的小猪");
-            pig = pigList.add(pig);
+            pig = writer.add(pig);
             pig.setAge(2);
             return pig;
         });
@@ -38,10 +38,10 @@ public class Demo05_Gru {
     @Test
     public void gruTransactional() {
         gru.runTransaction(pignoo -> {// 事务开始
-            var pigList = pignoo.writer(Pig.class);
+            var writer = pignoo.writer(Pig.class);
             Pig pig = new Pig();
             pig.setName("新的小猪");
-            pig = pigList.add(pig);
+            pig = writer.add(pig);
         });// 正常结束自动提交
     }
 
@@ -52,10 +52,10 @@ public class Demo05_Gru {
     public void rollback() {
         try {// 外层捕获异常不会影响事务回滚，Exception抛到pignoo作用域外就会回滚，平时写代码不用写这层try-catch
             gru.runTransaction(pignoo -> {
-                var pigList = pignoo.writer(Pig.class);
+                var writer = pignoo.writer(Pig.class);
                 Pig pig = new Pig();
                 pig.setName("应该被回滚掉的小猪");
-                pigList.add(pig);
+                writer.add(pig);
                 throw new RuntimeException("测试事务回滚");// 测试事务回滚
             });
         } catch (Exception e) {

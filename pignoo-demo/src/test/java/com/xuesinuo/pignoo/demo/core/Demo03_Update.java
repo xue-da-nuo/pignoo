@@ -28,10 +28,10 @@ public class Demo03_Update {
      */
     @Test
     public void add() {
-        var pigList = pignoo.writer(Pig.class);
+        var writer = pignoo.writer(Pig.class);
         Pig pig = new Pig();
         pig.setName("新的小猪");
-        Pig newPig = pigList.add(pig);// 这一步，将pig放入List，等同于将数据插入数据库
+        Pig newPig = writer.add(pig);// 这一步，将pig放入List，等同于将数据插入数据库
 
         pig.setAge(1);// pig是你new的小猪，不是数据库中的小猪，此时数据库中age=null
         System.out.println(pig);
@@ -44,13 +44,18 @@ public class Demo03_Update {
      */
     @Test
     public void updateByQuery() {
-        Long id = 1L;
-        String name = "猪猪改名字";
+        // writer修改对象，就可以达到修改数据库的效果
+        var writer = pignoo.writer(Pig.class);
+        Pig pigInDatabase = writer.filter(Pig::getId, "==", 1L).getOne();
+        if (pigInDatabase != null) {
+            pigInDatabase.setName("猪猪改名字1");
+        }
 
-        var pigList = pignoo.writer(Pig.class);
-        Pig pig = pigList.filter(Pig::getId, "==", id).getOne();
-        if (pig != null) {
-            pig.setName(name);
+        // reader只查询，修改无法映射到数据库
+        var reader = pignoo.reader(Pig.class);
+        Pig pigInMemory = reader.filter(Pig::getId, "==", 1L).getOne();
+        if (pigInMemory != null) {
+            pigInMemory.setName("猪猪改名字2");
         }
     }
 
@@ -63,19 +68,19 @@ public class Demo03_Update {
         pig.setId(1L);
         pig.setName("猪猪改名字2");
 
-        var pigList = pignoo.writer(Pig.class);
-        pigList.mixById(pig);// mix 混合：根据ID匹配已有元素，忽略入参中的null，只更新非空。也就是将旧数据和新数据混合在一起
-        pigList.replaceById(pig);// replace 替换：根据ID匹配已有元素，用新实体完全替换旧的数据，NULL也会更新
+        var writer = pignoo.writer(Pig.class);
+        writer.mixById(pig);// mix 混合：根据ID匹配已有元素，忽略入参中的null，只更新非空。也就是将旧数据和新数据混合在一起
+        writer.replaceById(pig);// replace 替换：根据ID匹配已有元素，用新实体完全替换旧的数据，NULL也会更新
 
         Pig pig2 = new Pig();
         pig2.setName("老猪改名字");
-        pigList.filter(Pig::getAge, ">", 5);
-        pigList.mixAll(pig2);// 混合所有满足条件的数据，ID不会被更新
-        pigList.replaceAll(pig2);// 替换所有满足条件的数据，ID不会被更新
+        writer.filter(Pig::getAge, ">", 5);
+        writer.mixAll(pig2);// 混合所有满足条件的数据，ID不会被更新
+        writer.replaceAll(pig2);// 替换所有满足条件的数据，ID不会被更新
 
         // 通过入参实体无法更新ID，想要更新ID，使用先查询后更新的方式
-        var pigList2 = pignoo.writer(Pig.class);
-        Pig maxIdPig = pigList2.sort(Pig::getId, SMode.MAX_FIRST).getOne();
+        var writer2 = pignoo.writer(Pig.class);
+        Pig maxIdPig = writer2.sort(Pig::getId, SMode.MAX_FIRST).getOne();
         maxIdPig.setId(maxIdPig.getId() + 1);
     }
 
@@ -83,26 +88,26 @@ public class Demo03_Update {
      * 删除和修改类似，可以先查询再删除，或者通过ID（实体）删除
      */
     public void delete() {
-        var pigList = pignoo.writer(Pig.class);
+        var writer = pignoo.writer(Pig.class);
 
         // 按条件删
-        pigList.copyWriter().filter(Pig::getId, "!=", 1L)
+        writer.copyWriter().filter(Pig::getId, "!=", 1L)
                 .filter(Pig::getAge, ">", 5)
                 .removeAll();
 
         // 查询出一部分数据，再按ID删
-        var deletePigs = pigList.copyWriter().filter(Pig::getId, "!=", 1L)
+        var deletePigs = writer.copyWriter().filter(Pig::getId, "!=", 1L)
                 .sort(Pig::getId, SMode.MAX_FIRST)
                 .get(0, 2);
-        pigList.copyWriter().filter(Pig::getId, "in", deletePigs.stream().map(Pig::getId).toList())
+        writer.copyWriter().filter(Pig::getId, "in", deletePigs.stream().map(Pig::getId).toList())
                 .removeAll();
 
         // 同上面，删除时候通过直接传入的方式实体携带ID
-        pigList.copyWriter().filter(Pig::getId, "!=", 1L)
+        writer.copyWriter().filter(Pig::getId, "!=", 1L)
                 .sort(Pig::getId, SMode.MAX_FIRST)
                 .get(0, 2)
                 .stream().forEach(p -> {
-                    pigList.removeById(p);
+                    writer.removeById(p);
                 });;
 
     }

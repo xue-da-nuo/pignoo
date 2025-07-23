@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 
 /**
  * Pignoo的SQL执行器
+ * <p>
+ * SQL Executer in Pignoo
  * 
  * @author xuesinuo
  * @version 0.1.0

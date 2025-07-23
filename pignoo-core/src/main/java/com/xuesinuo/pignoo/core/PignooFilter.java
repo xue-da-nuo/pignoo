@@ -9,7 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * PignooWriter的条件筛选器
+ * Pignoo的条件筛选器
+ * <p>
+ * Pignoo's filter
  * 
  * @author xuesinuo
  * @since 0.1.0

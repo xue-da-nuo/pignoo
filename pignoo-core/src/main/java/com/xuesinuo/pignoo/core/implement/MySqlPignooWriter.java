@@ -22,6 +22,8 @@ import com.xuesinuo.pignoo.core.entity.SqlParam;
 
 /**
  * 基于MySQL语法实现的{@link PignooWriter}
+ * <p>
+ * A MySQL implementation of {@link PignooWriter}
  * 
  * @author xuesinuo
  * @since 0.1.0

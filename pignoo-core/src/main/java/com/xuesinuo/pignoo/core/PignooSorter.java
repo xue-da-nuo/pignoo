@@ -5,7 +5,9 @@ import java.util.function.Function;
 import lombok.Getter;
 
 /**
- * PignooWriter的排序器
+ * Pignoo的排序器
+ * <p>
+ * Pignoo's sorter
  * 
  * @author xuesinuo
  * @since 0.1.0

@@ -28,10 +28,10 @@ public class Demo04_Transactional {
      */
     @Test
     public void noTransactional() {
-        var pigList = pignoo.writer(Pig.class);
+        var writer = pignoo.writer(Pig.class);
         Pig pig = new Pig();
         pig.setName("新的小猪");
-        pig = pigList.add(pig);
+        pig = writer.add(pig);
         pig.setAge(2);
     }
 
@@ -41,10 +41,10 @@ public class Demo04_Transactional {
     @Test
     @Transactional
     public void gruTransactional() {
-        var pigList = pignoo.writer(Pig.class);
+        var writer = pignoo.writer(Pig.class);
         Pig pig = new Pig();
         pig.setName("新的小猪");
-        pig = pigList.add(pig);
+        pig = writer.add(pig);
     }
 
     /**
@@ -70,10 +70,10 @@ class Demo04_Transactional_Tool {
 
     @Transactional
     public void rollback() {
-        var pigList = pignoo.writer(Pig.class);
+        var writer = pignoo.writer(Pig.class);
         Pig pig = new Pig();
         pig.setName("应该被回滚掉的小猪");
-        pigList.add(pig);
+        writer.add(pig);
         throw new RuntimeException("测试事务回滚");// 测试事务回滚
     }
 }

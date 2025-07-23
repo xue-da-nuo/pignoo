@@ -14,7 +14,9 @@ import com.xuesinuo.pignoo.core.PignooReader;
 import com.xuesinuo.pignoo.core.config.DatabaseEngine;
 
 /**
- * 基础的Pignoo实现
+ * 基于JDBC事务的Pignoo实现
+ * <p>
+ * Pignoo implementation based on JDBC transaction
  * 
  * @author xuesinuo
  * @since 0.1.0
