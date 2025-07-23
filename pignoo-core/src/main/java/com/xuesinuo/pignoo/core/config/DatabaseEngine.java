@@ -23,6 +23,10 @@ public enum DatabaseEngine {
      * 数据库引擎名称，全小写
      * <p>
      * Database engine name, all lowercase
+     *
+     * @return 引擎名称
+     *         <p>
+     *         engine name
      */
     private String name;
 
