@@ -116,7 +116,7 @@ Pignoo - 小黄人语的“无聊”。《卑鄙的我3》中小黄人们高呼�
 做出如下更新：
 
 - 将PignooList更名为PignooWriter
-- 将读操作拆分成为PignooReader接口，与PignooWriter做分离
+- 增加PignooReader接口，将PignooWriter中的读操作规入PignooReader
 - PignooReader的直接实现为只读的
   - 里面没有写操作
   - 获取到的对象也不做代理：只读场景允许在内存中随意编辑对象，不影响数据库
