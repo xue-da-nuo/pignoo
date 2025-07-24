@@ -2,6 +2,8 @@
 
 Pignoo是一个应对大部分小型Java项目的轻量JDBC框架。
 
+**0版本警告：在1.0.0发布之前，架构设计还处在变化中。0版本的每个发行版仅能确保在当前小版本下是稳定可用的。**
+
 通过Maven引入：
 
 ```xml
@@ -88,7 +90,7 @@ Pignoo是基于**标准JavaBean**、**JDBC**、**DataSource**、**Slf4j**、**Sp
 
 Pignoo中，有个很关键的设计思路：用List与对象的操作取代数据库操作。为了实现这个构想，从PignooWriter中取出的每个对象，都会增加一层代理，代理监听setter方法并执行SQL操作，从而达到对象操作等于数据操作的效果。这也是Pignoo牺牲性能，换取易用性的提现。
 
-Pignoo的**作用域**外，setter的代理操作会失效。方便将对象传出Pignoo作用范围后，再做其他set操作，不会影响数据库。
+Pignoo的**作用域**外，setter的代理操作会失效，再做JavaBean的set操作，不会影响数据库。
 
 ## 为啥叫Pignoo
 
