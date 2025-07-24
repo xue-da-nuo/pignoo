@@ -211,6 +211,9 @@ public class MySqlPignooWriter<E> extends MySqlPignooReader<E> implements Pignoo
         sql.append("SET ");
         sql.append(params.keySet().stream().map(column -> "`" + column + "`=" + sqlParam.next(params.get(column))).collect(Collectors.joining(",")) + " ");
         sql.append("WHERE `" + entityMapper.primaryKeyColumn() + "`=" + sqlParam.next(primaryKeyValue) + " ");
+        if (filter != null) {
+            sql.append("AND " + filter2Sql(filter, sqlParam));
+        }
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
@@ -248,6 +251,9 @@ public class MySqlPignooWriter<E> extends MySqlPignooReader<E> implements Pignoo
         sql.append("SET ");
         sql.append(params.keySet().stream().map(column -> "`" + column + "`=" + (params.get(column) == null ? "NULL" : sqlParam.next(params.get(column)))).collect(Collectors.joining(",")) + " ");
         sql.append("WHERE `" + entityMapper.primaryKeyColumn() + "`=" + sqlParam.next(primaryKeyValue) + " ");
+        if (filter != null) {
+            sql.append("AND " + filter2Sql(filter, sqlParam));
+        }
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
@@ -333,6 +339,9 @@ public class MySqlPignooWriter<E> extends MySqlPignooReader<E> implements Pignoo
         sql.append("`" + entityMapper.tableName() + "` ");
         sql.append("WHERE ");
         sql.append("`" + entityMapper.primaryKeyColumn() + "`=" + sqlParam.next(primaryKeyValue) + " ");
+        if (filter != null) {
+            sql.append("AND " + filter2Sql(filter, sqlParam));
+        }
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
