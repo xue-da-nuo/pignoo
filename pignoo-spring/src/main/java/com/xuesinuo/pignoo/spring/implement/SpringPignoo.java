@@ -54,8 +54,6 @@ public class SpringPignoo implements Pignoo {
 
     private final ThreadLocal<SpringPignooItem> transactionPignooThreadLocal = new ThreadLocal<>();// 事务Pignoo，每个线程分配一个
 
-    private final ThreadLocal<Boolean> transactionPignooThreadLocalFlag = new ThreadLocal<>();// 事务已开启标志，开启时，会注册一个事务生命周期钩子
-
     private boolean hasClosed = false;// 是否已经关闭
 
     /**
@@ -132,19 +130,13 @@ public class SpringPignoo implements Pignoo {
         boolean inTransaction = TransactionSynchronizationManager.isActualTransactionActive();
         SpringPignooItem pignoo = null;
         if (inTransaction) {
-            synchronized (transactionPignooThreadLocal) {
-                Boolean flag = transactionPignooThreadLocalFlag.get();
-                if (flag == null || !flag) {
-                    TransactionSynchronizationManager.registerSynchronization(new PignooTransactionSynchronizationAdapter(this));
-                    transactionPignooThreadLocalFlag.set(true);
-                }
-                SpringPignooItem transactionPignoo = transactionPignooThreadLocal.get();
-                if (transactionPignoo == null) {
-                    transactionPignoo = new SpringPignooItem(this.dataSource, this.config, true);
-                    transactionPignooThreadLocal.set(transactionPignoo);
-                }
-                pignoo = transactionPignoo;
+            SpringPignooItem transactionPignoo = transactionPignooThreadLocal.get();
+            if (transactionPignoo == null) {
+                TransactionSynchronizationManager.registerSynchronization(new PignooTransactionSynchronizationAdapter(this));
+                transactionPignoo = new SpringPignooItem(this.dataSource, this.config, true);
+                transactionPignooThreadLocal.set(transactionPignoo);
             }
+            pignoo = transactionPignoo;
         } else {
             if (this.basePignoo.closed()) {
                 this.basePignoo = new SpringPignooItem(dataSource, config, false);
@@ -165,7 +157,6 @@ public class SpringPignoo implements Pignoo {
             pignoo.close();
         }
         transactionPignooThreadLocal.remove();
-        transactionPignooThreadLocalFlag.remove();
         log.debug("一次Spring-Pignoo事务完成了，并正确得回收了资源！");
         log.debug("Once Spring-Pignoo transaction finished!");
     }
