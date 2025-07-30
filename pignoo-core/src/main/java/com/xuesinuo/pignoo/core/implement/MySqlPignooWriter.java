@@ -128,7 +128,9 @@ public class MySqlPignooWriter<E> extends MySqlPignooReader<E> implements Pignoo
             sql.append("ORDER BY ");
             sql.append(sorter2Sql(sorter));
         }
-        sql.append("FOR UPDATE ");
+        if (inTransaction) {
+            sql.append("FOR UPDATE ");
+        }
         List<E> eList = sqlExecuter.selectList(connGetter, connCloser, sql.toString(), sqlParam.params, c);
         return eList;
     }
@@ -151,7 +153,9 @@ public class MySqlPignooWriter<E> extends MySqlPignooReader<E> implements Pignoo
             sql.append(sorter2Sql(sorter));
         }
         sql.append("LIMIT " + offset + "," + limit + " ");
-        sql.append("FOR UPDATE ");
+        if (inTransaction) {
+            sql.append("FOR UPDATE ");
+        }
         List<E> eList = sqlExecuter.selectList(connGetter, connCloser, sql.toString(), sqlParam.params, c);
         return eList;
     }
