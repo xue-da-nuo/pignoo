@@ -33,6 +33,7 @@ public class Demo01_EasyStart {
         pig.setPigWeight(new BigDecimal("10.2"));
         pig.setAge(2);
         pig.setColor("白");
+        pig.setNickName("忽略昵称");
         pig = writer.add(pig);
         System.out.println(pig);
     }

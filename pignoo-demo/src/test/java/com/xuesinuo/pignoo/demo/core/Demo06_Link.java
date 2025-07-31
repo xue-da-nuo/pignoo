@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.xuesinuo.pignoo.core.Gru;
 import com.xuesinuo.pignoo.core.PignooSorter.SMode;
+import com.xuesinuo.pignoo.core.annotation.Ignore;
 import com.xuesinuo.pignoo.core.annotation.Link;
 import com.xuesinuo.pignoo.demo.table.Pig;
 
@@ -24,6 +25,8 @@ public class Demo06_Link {
     public static class PigLinker {
         private Long id;
         private String name;
+        @Ignore
+        private String nickName;
     }
 
     /**
