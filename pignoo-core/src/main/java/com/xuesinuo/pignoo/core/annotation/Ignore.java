@@ -7,17 +7,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 映射到另一个主实体：在纯对象模式下，用于把操作映射到另一个对象上
+ * 忽略属性，在纯对象模式下，用于标记一个属性不做存储
  * <p>
- * Map to another main entity: in pure object mode, used to map operations to another object
- * 
+ * Ignore attribute, in pure object mode, used to mark an attribute does not store
+ *
  * @author xuesinuo
  * @since 0.2.4
  * @version 0.2.4
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
-public @interface Link {
-    Class<?> value();
+@Target({ ElementType.FIELD })
+public @interface Ignore {
+
 }

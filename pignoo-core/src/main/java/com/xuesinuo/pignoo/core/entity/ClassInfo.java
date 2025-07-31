@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.annotation.Column;
+import com.xuesinuo.pignoo.core.annotation.Ignore;
 import com.xuesinuo.pignoo.core.annotation.Link;
 import com.xuesinuo.pignoo.core.annotation.PrimaryKey;
 import com.xuesinuo.pignoo.core.annotation.Table;
@@ -86,6 +87,9 @@ public class ClassInfo<E> {
         }
         Field[] classFields = c.getDeclaredFields();
         for (Field field : classFields) {
+            if (field.isAnnotationPresent(Ignore.class)) {
+                continue;
+            }
             if (field.isAnnotationPresent(PrimaryKey.class)) {
                 PrimaryKey primaryKeyAnn = field.getAnnotation(PrimaryKey.class);
                 Column columnAnn = field.getAnnotation(Column.class);
