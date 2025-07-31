@@ -25,7 +25,6 @@ public class FunctionNameGetter<E> {
     private E proxy;
     private NamePicker namePicker;
 
-    @SuppressWarnings("unchecked")
     /**
      * 构造方法
      * <p>
@@ -35,6 +34,7 @@ public class FunctionNameGetter<E> {
      *          <p>
      *          Entity Type
      */
+    @SuppressWarnings("unchecked")
     public FunctionNameGetter(Class<E> c) {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(c);

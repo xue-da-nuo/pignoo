@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.annotation.Column;
+import com.xuesinuo.pignoo.core.annotation.Link;
 import com.xuesinuo.pignoo.core.annotation.PrimaryKey;
 import com.xuesinuo.pignoo.core.annotation.Table;
 import com.xuesinuo.pignoo.core.config.AnnotationMode;
@@ -20,7 +21,7 @@ import com.xuesinuo.pignoo.core.config.AnnotationMode.AnnotationMixMode;
  * @param <E> JavaBean Type
  * @author xuesinuo
  * @since 0.1.0
- * @version 0.1.0
+ * @version 0.2.4
  */
 public class ClassInfo<E> {
     protected Constructor<E> constructor;
@@ -78,7 +79,7 @@ public class ClassInfo<E> {
             throw new RuntimeException("Entity " + c.getName() + " read table name failed");
         }
         try {
-            constructor = c.getDeclaredConstructor();
+            this.constructor = c.getDeclaredConstructor();
         } catch (NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
@@ -168,6 +169,21 @@ public class ClassInfo<E> {
             this.primaryKeyField = this.fields.get(indexOfPk);
             this.primaryKeyGetter = this.getters.get(indexOfPk);
             this.primaryKeySetter = this.setters.get(indexOfPk);
+        }
+        Link linkAnn = c.getAnnotation(Link.class);
+        if (linkAnn != null) {
+            ClassInfo<?> linkClassInfo = new ClassInfo<>(linkAnn.value(), config);
+            int fieldsCount = this.fields.size();
+            for (int i = fieldsCount - 1; i >= 0; i--) {
+                if (!linkClassInfo.columns.contains(this.columns.get(i))) {
+                    this.fields.remove(i);
+                    this.columns.remove(i);
+                    this.getters.remove(i);
+                    this.setters.remove(i);
+                    this.getterNames.remove(i);
+                    this.setterNames.remove(i);
+                }
+            }
         }
     }
 
