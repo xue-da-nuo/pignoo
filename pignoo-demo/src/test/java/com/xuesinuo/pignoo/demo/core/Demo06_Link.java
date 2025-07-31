@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.xuesinuo.pignoo.core.Gru;
 import com.xuesinuo.pignoo.core.PignooSorter.SMode;
+import com.xuesinuo.pignoo.core.annotation.Link;
 import com.xuesinuo.pignoo.demo.table.Pig;
 
 import lombok.Data;
@@ -19,6 +20,7 @@ public class Demo06_Link {
     @Autowired
     public Gru gru;
 
+    @Link(Pig.class)
     @Data
     public static class PigLinker {
         private Long id;
@@ -26,7 +28,7 @@ public class Demo06_Link {
     }
 
     /**
-     * Link写法，忽略掉其他字段
+     * Link写法，忽略掉其他字段。注意：忽略的字段如果是非空且数据库没有设置默认值，则新增会报错的！
      */
     @Test
     public void noTransactional() {

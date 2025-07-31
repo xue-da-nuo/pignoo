@@ -173,6 +173,7 @@ public class ClassInfo<E> {
         Link linkAnn = c.getAnnotation(Link.class);
         if (linkAnn != null) {
             ClassInfo<?> linkClassInfo = new ClassInfo<>(linkAnn.value(), config);
+            this.tableName = linkClassInfo.tableName;
             int fieldsCount = this.fields.size();
             for (int i = fieldsCount - 1; i >= 0; i--) {
                 if (!linkClassInfo.columns.contains(this.columns.get(i))) {
