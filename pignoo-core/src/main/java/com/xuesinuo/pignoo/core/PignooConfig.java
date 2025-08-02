@@ -18,6 +18,27 @@ import lombok.Data;
  */
 @Data
 public class PignooConfig {
+
+    /**
+     * 复制一份配置文件
+     * <p>
+     * Copy a configuration file
+     *
+     * @version 0.2.1
+     * @return 复制后的配置
+     *         <p>
+     *         copied configuration
+     */
+    public PignooConfig copy() {
+        PignooConfig config = new PignooConfig();
+        config.setEngine(this.engine);
+        config.setAnnotationMode(this.annotationMode);
+        config.setAnnotationMixMode(this.annotationMixMode);
+        config.setPrimaryKeyNamingConvention(this.primaryKeyNamingConvention);
+        config.setAutoPrimaryKey(this.autoPrimaryKey);
+        return config;
+    }
+
     /**
      * 数据库引擎。如果不配置，则尝试从数据库读取
      * <p>
@@ -60,22 +81,4 @@ public class PignooConfig {
      * @version 0.2.0
      */
     private Boolean autoPrimaryKey = true;
-
-    /**
-     * 复制一份配置文件
-     * <p>
-     * Copy a configuration file
-     *
-     * @version 0.2.1
-     * @return a {@link com.xuesinuo.pignoo.core.PignooConfig} object
-     */
-    public PignooConfig copy() {
-        PignooConfig config = new PignooConfig();
-        config.setEngine(this.engine);
-        config.setAnnotationMode(this.annotationMode);
-        config.setAnnotationMixMode(this.annotationMixMode);
-        config.setPrimaryKeyNamingConvention(this.primaryKeyNamingConvention);
-        config.setAutoPrimaryKey(this.autoPrimaryKey);
-        return config;
-    }
 }

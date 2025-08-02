@@ -103,7 +103,7 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                 }
                 sql.append("PRIMARY KEY (`" + pkColumn + "`) ");
                 sql.append(") ");
-                result.setAdvise2AddTable(sql.toString());
+                result.getAdvise2AddTable().add(sql.toString());
             } else {// 表存在：检查字段
                 String sql = """
                         SELECT

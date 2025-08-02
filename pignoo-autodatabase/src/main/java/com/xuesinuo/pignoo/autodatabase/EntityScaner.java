@@ -1,10 +1,20 @@
 package com.xuesinuo.pignoo.autodatabase;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
+import com.xuesinuo.pignoo.autodatabase.EntityScanConfig.BuildMode;
+import com.xuesinuo.pignoo.autodatabase.entity.DatabaseCheckResult;
+import com.xuesinuo.pignoo.autodatabase.impl.DatabaseChecker4MySql;
 import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.annotation.Table;
+import com.xuesinuo.pignoo.core.config.DatabaseEngine;
 import com.xuesinuo.pignoo.core.entity.EntityMapper;
 
 import io.github.classgraph.ClassGraph;
@@ -24,42 +34,73 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class EntityScaner {
+
+    private final PignooConfig pignooConfig;
+
+    private final EntityScanConfig entityScanConfig;
+
+    private final DatabaseChecker databaseChecker;
+
+    public EntityScaner(DataSource dataSource, PignooConfig pignooConfig, EntityScanConfig entityScanConfig) {
+        this.pignooConfig = pignooConfig.copy();
+        this.entityScanConfig = entityScanConfig.copy();
+        if (pignooConfig.getEngine() == null) {
+            try (Connection conn = dataSource.getConnection()) {
+                pignooConfig.setEngine(DatabaseEngine.getDatabaseEngineByConnection(conn));
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("Search database engine error", e);
+            }
+        }
+        switch (pignooConfig.getEngine()) {
+        case DatabaseEngine.MySQL:
+            this.databaseChecker = new DatabaseChecker4MySql(dataSource);
+            break;
+        }
+        throw new RuntimeException("Unknow database engine");
+    }
+
     /**
      * 扫描指定包下的所有实体类
      * <p>
      * Scan all entity classes under the specified package
      * 
-     * @param pignooConfig     pignoo配置
-     *                         <p>
-     *                         pignoo configuration
-     * @param hasChildPackages 是否扫描子包
-     *                         <p>
-     *                         Whether to scan subpackages
-     * @param annClassOnly     是否只扫描带有注解的类
-     *                         <p>
-     *                         Whether to scan only classes with annotations
-     * @param packages         包名
-     *                         <p>
-     *                         package name
      * @return 实体Mapper集合
      *         <p>
      *         EntityMapper collection
      */
-    public static Set<EntityMapper<?>> scan(PignooConfig pignooConfig, boolean hasChildPackages, boolean annClassOnly, String... packages) {
+    public Set<EntityMapper<?>> scan() {
+        HashSet<String> packages = new HashSet<>(entityScanConfig.getPackages().length + entityScanConfig.getClassesForScanPackage().length);
+        for (String packageStr : entityScanConfig.getPackages()) {
+            if (packageStr != null && !packageStr.isBlank()) {
+                packages.add(packageStr);
+            }
+        }
+        for (Class<?> classForScanPackage : entityScanConfig.getClassesForScanPackage()) {
+            if (classForScanPackage != null) {
+                packages.add(classForScanPackage.getPackage().getName());
+            }
+        }
+        if (packages.isEmpty()) {
+            throw new RuntimeException("EntityScanConfig packages is empty");
+        }
+        String[] packageArray = packages.toArray(new String[packages.size()]);
         ClassGraph classGraph = new ClassGraph();
         classGraph.enableAllInfo();
-        if (hasChildPackages) {
-            classGraph.acceptPackages(packages);
+        if (entityScanConfig.getScanChildPackages()) {
+            classGraph.acceptPackages(packageArray);
         } else {
-            classGraph.acceptPackagesNonRecursive(packages);
+            classGraph.acceptPackagesNonRecursive(packageArray);
         }
         Set<EntityMapper<?>> entityMappers = new HashSet<>();
-        if (annClassOnly) {
+        if (entityScanConfig.getAnnotationClassOnly()) {
             classGraph.enableAnnotationInfo();
         }
         try (ScanResult scanResult = classGraph.scan()) {
             ClassInfoList classInfo4GraphList = null;
-            if (annClassOnly) {
+            if (entityScanConfig.getAnnotationClassOnly()) {
                 classInfo4GraphList = scanResult.getClassesWithAnnotation(Table.class);
             } else {
                 classInfo4GraphList = scanResult.getAllClasses();
@@ -69,7 +110,7 @@ public class EntityScaner {
                     .forEach(classInfo4Graph -> {
                         Class<?> entityClass = classInfo4Graph.loadClass();
                         EntityMapper<?> mapper = null;
-                        mapper = EntityMapper.build(entityClass, pignooConfig);
+                        mapper = EntityMapper.build(entityClass, this.pignooConfig);
                         entityMappers.add(mapper);
                         log.info("[Pignoo-scan] class: {}, table-name: {}", entityClass.getName(), mapper.tableName());
                     });
@@ -88,4 +129,35 @@ public class EntityScaner {
                 && classInfo.getModifiersStr().indexOf("public") >= 0;
     }
 
+    /**
+     * 扫描并构建
+     * <p>
+     * Scan and build
+     */
+    public void scanAndBuild() {
+        DatabaseCheckResult allResult = new DatabaseCheckResult();
+        for (EntityMapper<?> mapper : scan()) {
+            DatabaseCheckResult itemResult = databaseChecker.check(mapper);
+            allResult.getAdvise2AddTable().addAll(itemResult.getAdvise2AddTable());
+            allResult.getAdvise2AddColumn().addAll(itemResult.getAdvise2AddColumn());
+            allResult.getAdvise2UpdateColumn().addAll(itemResult.getAdvise2UpdateColumn());
+            allResult.getAdvise2RemoveColumn().addAll(itemResult.getAdvise2RemoveColumn());
+            allResult.getOtherMessage().addAll(itemResult.getOtherMessage());
+        }
+        String warningTitle = """
+                ================================
+                = Pingnoo-Autodatabase Warning =
+                ================================
+                """;
+        String errorTitle = """
+                ==============================
+                = Pingnoo-Autodatabase Error =
+                ==============================
+                """;
+        List<String> workingList = new ArrayList<>();
+        StringBuilder warning = new StringBuilder(warningTitle);
+        StringBuilder error = new StringBuilder(errorTitle);
+        allResult.getOtherMessage().stream().forEach(msg -> error.append(msg).append("\n"));
+        // TODO
+    }
 }
