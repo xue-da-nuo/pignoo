@@ -87,4 +87,5 @@ public class EntityScaner {
                 && classInfo.getModifiersStr().indexOf("static") >= 0
                 && classInfo.getModifiersStr().indexOf("public") >= 0;
     }
+
 }
