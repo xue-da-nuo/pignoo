@@ -61,13 +61,13 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
             conn.setAutoCommit(true);
             final Connection c = conn;
             // 是否选中了数据库
-            String database = sqlExecuter.selectColumn(() -> c, (x) -> {}, "SELECT DATABASE()", new HashMap<>(), String.class);
+            String database = sqlExecuter.selectColumn(() -> c, x -> {}, "SELECT DATABASE()", new HashMap<>(), String.class);
             if (database == null || database.isBlank()) {
                 throw new RuntimeException("Connection must have a database selected.");
             }
             // 表是否存在
             String tableName = entityMapper.tableName();
-            Integer hasTable = sqlExecuter.selectColumn(() -> c, (x) -> {},
+            Integer hasTable = sqlExecuter.selectColumn(() -> c, x -> {},
                     "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='" + database + "' AND TABLE_NAME='" + tableName + "'",
                     new HashMap<>(), Integer.class);
             if (hasTable == null || hasTable == 0) {// 表不存在：创建表
