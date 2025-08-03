@@ -112,4 +112,11 @@ public class EntityScanConfig {
      * Whether to break the run: throw an exception when encountering an unacceptable problem
      */
     private Boolean breakRunning = true;
+
+    /**
+     * 自定义类型映射器，将Java类型转为SQL类型。自定义映射无法映射到时，使用默认映射。
+     * <p>
+     * Custom type mapper, convert Java type to SQL type. When the custom mapping cannot be mapped, use the default mapping.
+     */
+    private TypeMapper typeMapper = javaType -> null;
 }

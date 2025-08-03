@@ -26,39 +26,4 @@ public interface DatabaseChecker {
      *         Check Result
      */
     public DatabaseCheckResult check(EntityMapper<?> entityMapper);
-
-    /**
-     * java类型转（唯一的）sql类型
-     * <p>
-     * Java type to (unique) sql type
-     * <p>
-     * Java实体属性比数据库多时，使用此映射关系自动映射到数据库
-     * <p>
-     * Java entity attributes are more than the database, use this mapping relationship to automatically map to the database
-     * 
-     * @param javaType Java类型
-     *                 <p>
-     *                 Java type
-     * @return sql类型
-     *         <p>
-     *         sql type
-     */
-    public String javaType2SqlType(Class<?> javaType);
-
-    /**
-     * 验证Java类型与SQL类型是否可以映射
-     * <p>
-     * Verify whether Java type and SQL type can be mapped
-     * 
-     * @param javaType Java类型
-     *                 <p>
-     *                 Java type
-     * @param sqlType  SQL类型
-     *                 <p>
-     *                 SQL type
-     * @return 能否映射
-     *         <p>
-     *         Can it be mapped
-     */
-    public boolean javaType2SqlTypeOk(Class<?> javaType, String sqlType);
 }

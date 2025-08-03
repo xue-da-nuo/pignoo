@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import com.xuesinuo.pignoo.autodatabase.EntityScanConfig.BuildMode;
 import com.xuesinuo.pignoo.autodatabase.entity.DatabaseCheckResult;
 import com.xuesinuo.pignoo.autodatabase.impl.DatabaseChecker4MySql;
 import com.xuesinuo.pignoo.core.PignooConfig;
@@ -59,7 +58,7 @@ public class EntityScaner {
         }
         switch (pignooConfig.getEngine()) {
         case DatabaseEngine.MySQL:
-            this.databaseChecker = new DatabaseChecker4MySql(dataSource);
+            this.databaseChecker = new DatabaseChecker4MySql(dataSource, entityScanConfig.getTypeMapper());
             break;
         }
         throw new RuntimeException("Unknow database engine");
@@ -215,7 +214,7 @@ public class EntityScaner {
                     conn.createStatement().execute(workingItem);
                 }
                 conn.commit();
-                log.warn("Advises executed successfully!");
+                log.warn("Advise SQLs executed successfully!");
             } catch (SQLException e) {
                 throw new RuntimeException("Auto-Database run failed", e);
             } finally {
