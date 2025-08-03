@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -34,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class EntityScaner {
+    private final DataSource dataSource;
 
     private final PignooConfig pignooConfig;
 
@@ -42,6 +44,7 @@ public class EntityScaner {
     private final DatabaseChecker databaseChecker;
 
     public EntityScaner(DataSource dataSource, PignooConfig pignooConfig, EntityScanConfig entityScanConfig) {
+        this.dataSource = dataSource;
         this.pignooConfig = pignooConfig.copy();
         this.entityScanConfig = entityScanConfig.copy();
         if (pignooConfig.getEngine() == null) {
@@ -145,19 +148,92 @@ public class EntityScaner {
             allResult.getOtherMessage().addAll(itemResult.getOtherMessage());
         }
         String warningTitle = """
+
                 ================================
                 = Pingnoo-Autodatabase Warning =
                 ================================
-                """;
-        String errorTitle = """
-                ==============================
-                = Pingnoo-Autodatabase Error =
-                ==============================
+
                 """;
         List<String> workingList = new ArrayList<>();
         StringBuilder warning = new StringBuilder(warningTitle);
-        StringBuilder error = new StringBuilder(errorTitle);
-        allResult.getOtherMessage().stream().forEach(msg -> error.append(msg).append("\n"));
-        // TODO
+        allResult.getOtherMessage().stream().forEach(msg -> warning.append(msg).append("\n"));
+        if (this.entityScanConfig.getBuildMode() == EntityScanConfig.BuildMode.CAREFULLY) {
+            allResult.getAdvise2RemoveColumn().stream().forEach(msg -> warning.append(msg).append("\n"));
+            allResult.getAdvise2UpdateColumn().stream().forEach(msg -> warning.append(msg).append("\n"));
+            allResult.getAdvise2AddColumn().stream().forEach(msg -> warning.append(msg).append("\n"));
+            allResult.getAdvise2AddTable().stream().forEach(msg -> warning.append(msg).append("\n"));
+        } else if (this.entityScanConfig.getBuildMode() == EntityScanConfig.BuildMode.SAFELY) {
+            allResult.getAdvise2RemoveColumn().stream().forEach(msg -> warning.append(msg).append("\n"));
+            allResult.getAdvise2UpdateColumn().stream().forEach(msg -> warning.append(msg).append("\n"));
+            workingList.addAll(allResult.getAdvise2AddColumn());
+            workingList.addAll(allResult.getAdvise2AddTable());
+        } else if (this.entityScanConfig.getBuildMode() == EntityScanConfig.BuildMode.USABILITY) {
+            allResult.getAdvise2RemoveColumn().stream().forEach(msg -> warning.append(msg).append("\n"));
+            workingList.addAll(allResult.getAdvise2UpdateColumn());
+            workingList.addAll(allResult.getAdvise2AddColumn());
+            workingList.addAll(allResult.getAdvise2AddTable());
+        } else if (this.entityScanConfig.getBuildMode() == EntityScanConfig.BuildMode.RADICALLY) {
+            workingList.addAll(allResult.getAdvise2RemoveColumn());
+            workingList.addAll(allResult.getAdvise2UpdateColumn());
+            workingList.addAll(allResult.getAdvise2AddColumn());
+            workingList.addAll(allResult.getAdvise2AddTable());
+        }
+        String warn = warning.toString();
+        if (this.entityScanConfig.getBreakRunning() && !warn.equals(warningTitle)) {
+            if (!workingList.isEmpty()) {
+                log.error("""
+
+                        ===============================
+                        = Pingnoo-Autodatabase Advise =
+                        ===============================
+
+                        """ + workingList.stream().map(sql -> sql + ";\n").collect(Collectors.joining()));
+            }
+            log.error(warn);
+            throw new RuntimeException("Database check failed");
+        }
+        if (!workingList.isEmpty()) {
+            log.warn("""
+
+                    ===============================
+                    = Pingnoo-Autodatabase Advise =
+                    ===============================
+
+                    """ + workingList.stream().map(sql -> sql + ";\n").collect(Collectors.joining()));
+        }
+        if (!warn.equals(warningTitle)) {
+            log.error(warn);
+        }
+        if (!workingList.isEmpty()) {
+            Connection conn = null;
+            Boolean autoCommit = null;
+            try {
+                conn = dataSource.getConnection();
+                autoCommit = conn.getAutoCommit();
+                conn.setAutoCommit(false);
+                for (String workingItem : workingList) {
+                    conn.createStatement().execute(workingItem);
+                }
+                conn.commit();
+                log.warn("Advises executed successfully!");
+            } catch (SQLException e) {
+                throw new RuntimeException("Auto-Database run failed", e);
+            } finally {
+                if (conn != null && autoCommit != null) {
+                    try {
+                        conn.setAutoCommit(autoCommit);
+                    } catch (SQLException e) {
+                        log.error("Set auto commit failed At running auto-database");
+                    }
+                }
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        log.error("Close connection failed At running auto-database");
+                    }
+                }
+            }
+        }
     }
 }
