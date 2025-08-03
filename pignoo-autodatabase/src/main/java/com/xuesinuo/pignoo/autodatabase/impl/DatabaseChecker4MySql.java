@@ -11,8 +11,8 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -20,15 +20,9 @@ import javax.sql.DataSource;
 import com.xuesinuo.pignoo.autodatabase.DatabaseChecker;
 import com.xuesinuo.pignoo.autodatabase.TypeMapper;
 import com.xuesinuo.pignoo.autodatabase.entity.DatabaseCheckResult;
-import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.SqlExecuter;
-import com.xuesinuo.pignoo.core.annotation.Column;
-import com.xuesinuo.pignoo.core.annotation.PrimaryKey;
-import com.xuesinuo.pignoo.core.annotation.Table;
 import com.xuesinuo.pignoo.core.entity.EntityMapper;
 import com.xuesinuo.pignoo.core.implement.SimpleJdbcSqlExecuter;
-
-import lombok.Data;
 
 /**
  * MySQL数据库的检查工具
@@ -54,20 +48,6 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
     public DatabaseChecker4MySql(DataSource dataSource, TypeMapper typeMapper) {
         this.dataSource = dataSource;
         this.typeMapper = typeMapper;
-    }
-
-    @Data
-    @Table("PIGNOO_AUTO_DATABASE_CHECKER") // This table is not existed
-    public static class MySqlColumnInfo {
-        @Column("column_name")
-        @PrimaryKey(auto = false)
-        private String columnName;
-        @Column("column_type")
-        private String columnType;
-        @Column("pk")
-        private Boolean pk;
-        @Column("auto")
-        private Boolean auto;
     }
 
     @Override
@@ -123,12 +103,12 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                             c.COLUMN_NAME AS `column_name`,
                             c.DATA_TYPE AS `column_type`,
                             CASE
-                                WHEN k.COLUMN_NAME IS NOT NULL THEN 1
-                                ELSE 0
+                                WHEN k.COLUMN_NAME IS NOT NULL THEN '1'
+                                ELSE '0'
                             END AS `pk`,
                             CASE
-                                WHEN c.EXTRA = 'auto_increment' THEN 1
-                                ELSE 0
+                                WHEN c.EXTRA = 'auto_increment' THEN '1'
+                                ELSE '0'
                             END AS `auto`
                         FROM
                             information_schema.COLUMNS c
@@ -145,9 +125,8 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                             c.ORDINAL_POSITION;
                         """;
                 sql = sql.replaceAll("__database_name__", database).replaceAll("__table_name__", tableName);
-                EntityMapper.build(MySqlColumnInfo.class, new PignooConfig());
-                List<MySqlColumnInfo> columnInfosInDatabase = sqlExecuter.selectList(() -> c, (x) -> {}, sql, new HashMap<>(), MySqlColumnInfo.class);
-                List<String> columnNamesInDatabase = columnInfosInDatabase.stream().map(x -> x.getColumnName()).toList();
+                List<LinkedHashMap<String, String>> columnInfosInDatabase = sqlExecuter.selectLinkedHashMap(() -> c, (x) -> {}, sql, new HashMap<>());
+                List<String> columnNamesInDatabase = columnInfosInDatabase.stream().map(x -> x.get("column_name")).toList();
                 for (int i = 0; i < entityMapper.columns().size(); i++) {// 数据库中缺少字段：添加
                     String column = entityMapper.columns().get(i);
                     String columnType = this.javaType2SqlType(entityMapper.fields().get(i).getType());
@@ -170,7 +149,7 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                     if (entityMapper.columns().contains(columnNamesInDatabase.get(i))) {
                         continue;
                     }
-                    if (columnInfosInDatabase.get(i).getPk()) {
+                    if (columnInfosInDatabase.get(i).get("pk").equals("1")) {
                         result.getOtherMessage().add("Primary-Key '" + column + "' not in " + entityMapper.getType().getName() + ", in table: " + tableName);
                         continue;
                     }
@@ -182,11 +161,14 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                     if (!columnNamesInDatabase.contains(column)) {
                         continue;
                     }
-                    MySqlColumnInfo ciid = columnInfosInDatabase.stream().filter(cid -> cid.getColumnName().equals(column)).findFirst().get();
-                    if (this.javaType2SqlTypeOk(entityMapper.fields().get(i).getType(), ciid.getColumnType())) {
+                    LinkedHashMap<String, String> ciid = columnInfosInDatabase.stream().filter(cid -> cid.get("column_name").equals(column)).findFirst().get();
+                    if (column.equals(entityMapper.primaryKeyColumn()) && ciid.get("pk").equals("1") && (entityMapper.autoPrimaryKey() != ciid.get("auto").equals("1"))) {
+                        result.getOtherMessage().add("Primary-Key auto setting is error in " + entityMapper.getType().getName() + " and table: " + tableName);
+                    }
+                    if (this.javaType2SqlTypeOk(entityMapper.fields().get(i).getType(), ciid.get("column_type"))) {
                         continue;
                     }
-                    if (entityMapper.primaryKeyColumn().equals(column) || ciid.getPk()) {
+                    if (entityMapper.primaryKeyColumn().equals(column) || ciid.get("pk").equals("1")) {
                         result.getOtherMessage().add("Primary-Key type mapping error with " + entityMapper.getType().getName() + " and table: " + tableName);
                         continue;
                     }

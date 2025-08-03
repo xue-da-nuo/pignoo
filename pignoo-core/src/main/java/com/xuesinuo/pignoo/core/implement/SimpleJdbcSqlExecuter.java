@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -124,6 +125,49 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
             }
         }
         return list;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<LinkedHashMap<String, String>> selectLinkedHashMap(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params) {
+        log.debug(sql);
+        log.debug(params.toString());
+        List<LinkedHashMap<String, String>> result = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = connGetter.get();
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                for (Map.Entry<Integer, Object> entry : params.entrySet()) {
+                    ps.setObject(entry.getKey() + 1, entry.getValue());
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<String> columnNames = new ArrayList<>();
+                    for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                        columnNames.add(rs.getMetaData().getColumnName(i));
+                    }
+                    while (rs.next()) {
+                        LinkedHashMap<String, String> row = new LinkedHashMap<>();
+                        for (String columnName : columnNames) {
+                            row.put(columnName, rs.getString(columnName));
+                        }
+                        result.add(row);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            RuntimeException ex;
+            if (e instanceof RuntimeException) {
+                ex = (RuntimeException) e;
+            } else {
+                ex = new RuntimeException(e);
+            }
+            throw ex;
+        } finally {
+            if (conn != null) {
+                connCloser.accept(conn);
+            }
+        }
+        return result;
     }
 
     /** {@inheritDoc} */

@@ -1,6 +1,7 @@
 package com.xuesinuo.pignoo.core;
 
 import java.sql.Connection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -42,6 +43,17 @@ public interface SqlExecuter {
      * @return 查询结果
      */
     <E> List<E> selectList(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c);
+
+    /**
+     * 查询Map结果
+     *
+     * @param connGetter 获取连接的函数
+     * @param connCloser 注销连接的函数
+     * @param sql        要执行的SQL
+     * @param params     SQL参数
+     * @return 查询结果
+     */
+    List<LinkedHashMap<String, String>> selectLinkedHashMap(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params);
 
     /**
      * 查询一个列
