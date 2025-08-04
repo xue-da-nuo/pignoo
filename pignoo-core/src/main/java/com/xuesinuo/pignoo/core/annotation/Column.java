@@ -42,10 +42,34 @@ public @interface Column {
      * @return 列的规模等级
      *         <p>
      *         Scale (Level) of the column
+     * @since 0.3.1
      */
     int scale() default 0;
 
+    /**
+     * 小规模数据
+     * <p>
+     * Small scale data
+     * 
+     * @since 0.3.1
+     */
     public static final int SCALE_SMALL = 1;
+
+    /**
+     * 中规模数据
+     * <p>
+     * Medium scale data
+     * 
+     * @since 0.3.1
+     */
     public static final int SCALE_MEDIUM = 2;
+
+    /**
+     * 大规模数据
+     * <p>
+     * Large scale data
+     * 
+     * @since 0.3.1
+     */
     public static final int SCALE_LARGE = 3;
 }
