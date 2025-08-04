@@ -11,7 +11,7 @@ import lombok.Data;
  * 
  * @author xuesinuo
  * @since 0.3.0
- * @version 0.3.0
+ * @version 0.3.1
  */
 @Data
 public class EntityScanConfig {
@@ -118,5 +118,5 @@ public class EntityScanConfig {
      * <p>
      * Custom type mapper, convert Java type to SQL type. When the custom mapping cannot be mapped, use the default mapping.
      */
-    private TypeMapper typeMapper = t -> null;
+    private TypeMapper typeMapper = (t, s) -> null;
 }

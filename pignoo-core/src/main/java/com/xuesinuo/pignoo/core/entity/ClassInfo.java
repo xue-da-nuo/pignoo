@@ -90,16 +90,14 @@ public class ClassInfo<E> {
             if (field.isAnnotationPresent(Ignore.class)) {
                 continue;
             }
+            Column columnAnn = field.getAnnotation(Column.class);
+            if (columnAnn == null && config.getAnnotationMode() == AnnotationMode.MUST) {
+                continue;
+            }
             if (field.isAnnotationPresent(PrimaryKey.class)) {
                 PrimaryKey primaryKeyAnn = field.getAnnotation(PrimaryKey.class);
-                Column columnAnn = field.getAnnotation(Column.class);
-                if (columnAnn == null && config.getAnnotationMode() == AnnotationMode.MUST) {
-                    throw new RuntimeException("Entity " + c.getName() + " the primaryKey missing @Column");
-                }
-                if (columnAnn != null && (columnAnn.value() == null || columnAnn.value().isBlank())) {
-                    throw new RuntimeException("Entity " + c.getName() + " the primaryKey @Column value can not be empty");
-                }
-                if (columnAnn != null) {
+                columnAnn = field.getAnnotation(Column.class);
+                if (columnAnn != null && columnAnn.value() != null && !columnAnn.value().isBlank()) {
                     this.primaryKeyColumn = columnAnn.value();
                 } else if (config.getAnnotationMode() == AnnotationMode.MIX) {
                     if (config.getAnnotationMixMode() == AnnotationMixMode.SAME) {
@@ -123,15 +121,9 @@ public class ClassInfo<E> {
             }
             if (field.isAnnotationPresent(Column.class) || config.getAnnotationMode() == AnnotationMode.MIX) {
                 this.fields.add(field);
-                Column columnAnn = field.getAnnotation(Column.class);
+                columnAnn = field.getAnnotation(Column.class);
                 String columnName = null;
-                if (columnAnn == null && config.getAnnotationMode() == AnnotationMode.MUST) {
-                    throw new RuntimeException("Entity " + c.getName() + "#" + field.getName() + " missing @Column");
-                }
-                if (columnAnn != null && (columnAnn.value() == null || columnAnn.value().isBlank())) {
-                    throw new RuntimeException("Entity " + c.getName() + "#" + field.getName() + " @Column value can not be empty");
-                }
-                if (columnAnn != null) {
+                if (columnAnn != null && columnAnn.value() != null && !columnAnn.value().isBlank()) {
                     columnName = columnAnn.value();
                 } else if (config.getAnnotationMode() == AnnotationMode.MIX) {
                     if (config.getAnnotationMixMode() == AnnotationMixMode.SAME) {

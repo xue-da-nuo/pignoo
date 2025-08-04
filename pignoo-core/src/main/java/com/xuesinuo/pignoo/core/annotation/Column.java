@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  *
  * @author xuesinuo
  * @since 0.1.0
- * @version 0.1.0
+ * @version 0.3.1
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -28,5 +28,24 @@ public @interface Column {
      *         <p>
      *         Database column name
      */
-    String value();
+    String value() default "";
+
+    /**
+     * 这个等级，不是真实的数字量级或字符串长度
+     * <p>
+     * This level is not the real number scale or string length
+     * <p>
+     * 默认情况下是1～3级的映射关系
+     * <p>
+     * By default, it is a mapping relationship of 1～3 levels
+     * 
+     * @return 列的规模等级
+     *         <p>
+     *         Scale (Level) of the column
+     */
+    int scale() default 0;
+
+    public static final int SCALE_SMALL = 1;
+    public static final int SCALE_MEDIUM = 2;
+    public static final int SCALE_LARGE = 3;
 }

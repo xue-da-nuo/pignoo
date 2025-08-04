@@ -1,5 +1,6 @@
 package com.xuesinuo.pignoo.autodatabase.impl;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -21,6 +22,7 @@ import com.xuesinuo.pignoo.autodatabase.DatabaseChecker;
 import com.xuesinuo.pignoo.autodatabase.TypeMapper;
 import com.xuesinuo.pignoo.autodatabase.entity.DatabaseCheckResult;
 import com.xuesinuo.pignoo.core.SqlExecuter;
+import com.xuesinuo.pignoo.core.annotation.Column;
 import com.xuesinuo.pignoo.core.entity.EntityMapper;
 import com.xuesinuo.pignoo.core.implement.SimpleJdbcSqlExecuter;
 
@@ -31,7 +33,7 @@ import com.xuesinuo.pignoo.core.implement.SimpleJdbcSqlExecuter;
  * 
  * @author xuesinuo
  * @since 0.3.0
- * @version 0.3.0
+ * @version 0.3.1
  */
 public class DatabaseChecker4MySql implements DatabaseChecker {
     /**
@@ -73,7 +75,7 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
             if (hasTable == null || hasTable == 0) {// 表不存在：创建表
                 StringBuilder sql = new StringBuilder();
                 String pkColumn = entityMapper.primaryKeyColumn();
-                String pkType = this.javaType2SqlType(entityMapper.primaryKeyField().getType());
+                String pkType = this.javaType2SqlType(entityMapper.primaryKeyField());
                 if (pkType == null || pkType.isBlank()) {
                     result.getOtherMessage().add("'" + pkColumn + "' in " + entityMapper.getType().getName() + " can't be mapped to a sql type.");
                 }
@@ -85,7 +87,7 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                         continue;
                     }
                     String column = entityMapper.columns().get(i);
-                    String columnType = this.javaType2SqlType(entityMapper.fields().get(i).getType());
+                    String columnType = this.javaType2SqlType(entityMapper.fields().get(i));
                     if (columnType == null || columnType.isBlank()) {
                         result.getOtherMessage().add("'" + column + "' in " + entityMapper.getType().getName() + " can't be mapped to a sql type.");
                     }
@@ -129,7 +131,7 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                 List<String> columnNamesInDatabase = columnInfosInDatabase.stream().map(x -> x.get("column_name")).toList();
                 for (int i = 0; i < entityMapper.columns().size(); i++) {// 数据库中缺少字段：添加
                     String column = entityMapper.columns().get(i);
-                    String columnType = this.javaType2SqlType(entityMapper.fields().get(i).getType());
+                    String columnType = this.javaType2SqlType(entityMapper.fields().get(i));
                     if (columnType == null || columnType.isBlank()) {
                         result.getOtherMessage().add("'" + column + "' in " + entityMapper.getType().getName() + " can't be mapped to a sql type.");
                         continue;
@@ -165,14 +167,14 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                     if (column.equals(entityMapper.primaryKeyColumn()) && ciid.get("pk").equals("1") && (entityMapper.autoPrimaryKey() != ciid.get("auto").equals("1"))) {
                         result.getOtherMessage().add("Primary-Key auto setting is error in " + entityMapper.getType().getName() + " and table: " + tableName);
                     }
-                    if (this.javaType2SqlTypeOk(entityMapper.fields().get(i).getType(), ciid.get("column_type"))) {
+                    if (this.javaType2SqlTypeOk(entityMapper.fields().get(i), ciid.get("column_type"))) {
                         continue;
                     }
                     if (entityMapper.primaryKeyColumn().equals(column) || ciid.get("pk").equals("1")) {
                         result.getOtherMessage().add("Primary-Key type mapping error with " + entityMapper.getType().getName() + " and table: " + tableName);
                         continue;
                     }
-                    String columnType = this.javaType2SqlType(entityMapper.fields().get(i).getType());
+                    String columnType = this.javaType2SqlType(entityMapper.fields().get(i));
                     if (columnType == null || columnType.isBlank()) {
                         result.getOtherMessage().add("'" + column + "' in " + entityMapper.getType().getName() + " can't be mapped to a sql type.");
                         continue;
@@ -203,17 +205,18 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
      * <p>
      * Java type is converted to MySQL type
      * 
-     * @param javaType Java类型
-     *                 <p>
-     *                 Java type
+     * @param field 实体字段
+     *              <p>
+     *              Entity field
      * @return MySQL类型
      *         <p>
      *         MySQL type
      */
-    private String javaType2SqlType(Class<?> javaType) {
-        String sqlType = typeMapper.javaTypeToSqlType(javaType);
+    private String javaType2SqlType(Field field) {
+        int scale = java.util.Optional.ofNullable(field.getAnnotation(Column.class)).map(x -> x.scale()).orElse(0);
+        String sqlType = typeMapper.javaTypeToSqlType(field.getType(), scale);
         if (sqlType == null || sqlType.isBlank()) {
-            sqlType = defaultTypeMapper.javaTypeToSqlType(javaType);
+            sqlType = defaultTypeMapper.javaTypeToSqlType(field.getType(), scale);
         }
         return sqlType;
     }
@@ -223,7 +226,7 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
      * <p>
      * Java type is converted to MySQL type by default
      */
-    public static final TypeMapper defaultTypeMapper = javaType -> {
+    public static final TypeMapper defaultTypeMapper = (javaType, scale) -> {
         // 基本数据类型
         if (Long.class.isAssignableFrom(javaType) || long.class.equals(javaType))
             return "bigint";
@@ -242,8 +245,17 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
         if (Character.class.isAssignableFrom(javaType) || char.class.equals(javaType))
             return "char(1)";
         // 字符串
-        if (String.class.isAssignableFrom(javaType))
-            return "varchar(255)";
+        if (String.class.isAssignableFrom(javaType)) {
+            if (scale == Column.SCALE_SMALL) {
+                return "varchar(255)";
+            } else if (scale == Column.SCALE_MEDIUM) {
+                return "text";
+            } else if (scale == Column.SCALE_LARGE) {
+                return "longtext";
+            } else {
+                return "varchar(255)";
+            }
+        }
         // 日期时间
         if (java.util.Date.class.isAssignableFrom(javaType))
             return "datetime";
@@ -262,8 +274,17 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
         if (OffsetTime.class.isAssignableFrom(javaType))
             return "time";
         // 数字
-        if (java.math.BigDecimal.class.isAssignableFrom(javaType))
-            return "decimal(32,4)";
+        if (java.math.BigDecimal.class.isAssignableFrom(javaType)) {
+            if (scale == Column.SCALE_SMALL) {
+                return "decimal(16,4)";
+            } else if (scale == Column.SCALE_MEDIUM) {
+                return "decimal(32,8)";
+            } else if (scale == Column.SCALE_LARGE) {
+                return "decimal(64,16)";
+            } else {
+                return "decimal(32,8)";
+            }
+        }
         if (BigInteger.class.isAssignableFrom(javaType))
             return "decimal(64,0)";
         // 二进制
@@ -301,63 +322,63 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
      * <p>
      * Verify whether Java type and SQL type can be mapped
      * 
-     * @param javaType Java类型
-     *                 <p>
-     *                 Java type
-     * @param sqlType  SQL类型
-     *                 <p>
-     *                 SQL type
+     * @param field   实体字段
+     *                <p>
+     *                Entity field
+     * @param sqlType SQL类型
+     *                <p>
+     *                SQL type
      * @return 能否映射
      *         <p>
      *         Can it be mapped
      */
-    private boolean javaType2SqlTypeOk(Class<?> javaType, String mysqlType) {
+    private boolean javaType2SqlTypeOk(Field field, String mysqlType) {
         mysqlType = mysqlType.toLowerCase();
         // 基本数据类型
-        if (Long.class.isAssignableFrom(javaType) || long.class.equals(javaType))
+        if (Long.class.isAssignableFrom(field.getType()) || long.class.equals(field.getType()))
             return LONG_TYPES.contains(mysqlType);
-        if (Integer.class.isAssignableFrom(javaType) || int.class.equals(javaType))
+        if (Integer.class.isAssignableFrom(field.getType()) || int.class.equals(field.getType()))
             return INTEGER_TYPES.contains(mysqlType);
-        if (Short.class.isAssignableFrom(javaType) || short.class.equals(javaType))
+        if (Short.class.isAssignableFrom(field.getType()) || short.class.equals(field.getType()))
             return SHORT_TYPES.contains(mysqlType);
-        if (Byte.class.isAssignableFrom(javaType) || byte.class.equals(javaType))
+        if (Byte.class.isAssignableFrom(field.getType()) || byte.class.equals(field.getType()))
             return BYTE_TYPES.contains(mysqlType);
-        if (Double.class.isAssignableFrom(javaType) || double.class.equals(javaType))
+        if (Double.class.isAssignableFrom(field.getType()) || double.class.equals(field.getType()))
             return DOUBLE_TYPES.contains(mysqlType);
-        if (Float.class.isAssignableFrom(javaType) || float.class.equals(javaType))
+        if (Float.class.isAssignableFrom(field.getType()) || float.class.equals(field.getType()))
             return FLOAT_TYPES.contains(mysqlType);
-        if (Boolean.class.isAssignableFrom(javaType) || boolean.class.equals(javaType))
+        if (Boolean.class.isAssignableFrom(field.getType()) || boolean.class.equals(field.getType()))
             return BOOLEAN_TYPES.contains(mysqlType);
-        if (Character.class.isAssignableFrom(javaType) || char.class.equals(javaType))
+        if (Character.class.isAssignableFrom(field.getType()) || char.class.equals(field.getType()))
             return CHARACTER_TYPES.contains(mysqlType);
         // String
-        if (String.class.isAssignableFrom(javaType))
+        if (String.class.isAssignableFrom(field.getType()))
             return STRING_TYPES.contains(mysqlType);
         // 数字
-        if (BigInteger.class.isAssignableFrom(javaType))
+        if (BigInteger.class.isAssignableFrom(field.getType()))
             return BIG_INTEGER_TYPES.contains(mysqlType);
-        if (BigDecimal.class.isAssignableFrom(javaType))
+        if (BigDecimal.class.isAssignableFrom(field.getType()))
             return BIG_DECIMAL_TYPES.contains(mysqlType);
         // 日期时间
-        if (java.util.Date.class.isAssignableFrom(javaType))
+        if (java.util.Date.class.isAssignableFrom(field.getType()))
             return UTIL_DATE_TYPES.contains(mysqlType);
-        if (LocalDate.class.isAssignableFrom(javaType))
+        if (LocalDate.class.isAssignableFrom(field.getType()))
             return LOCAL_DATE_TYPES.contains(mysqlType);
-        if (LocalTime.class.isAssignableFrom(javaType))
+        if (LocalTime.class.isAssignableFrom(field.getType()))
             return LOCAL_TIME_TYPES.contains(mysqlType);
-        if (LocalDateTime.class.isAssignableFrom(javaType))
+        if (LocalDateTime.class.isAssignableFrom(field.getType()))
             return LOCAL_DATE_TIME_TYPES.contains(mysqlType);
-        if (Instant.class.isAssignableFrom(javaType))
+        if (Instant.class.isAssignableFrom(field.getType()))
             return INSTANT_TYPES.contains(mysqlType);
-        if (ZonedDateTime.class.isAssignableFrom(javaType) || OffsetDateTime.class.isAssignableFrom(javaType))
+        if (ZonedDateTime.class.isAssignableFrom(field.getType()) || OffsetDateTime.class.isAssignableFrom(field.getType()))
             return ZONED_OR_OFFSET_DATE_TIME_TYPES.contains(mysqlType);
-        if (OffsetTime.class.isAssignableFrom(javaType))
+        if (OffsetTime.class.isAssignableFrom(field.getType()))
             return OFFSET_TIME_TYPES.contains(mysqlType);
         // 二进制
-        if (byte[].class.isAssignableFrom(javaType))
+        if (byte[].class.isAssignableFrom(field.getType()))
             return BINARY_TYPES.contains(mysqlType);
         // 枚举
-        if (javaType.isEnum())
+        if (field.getType().isEnum())
             return ENUM_TYPES.contains(mysqlType);
         return false;// 未匹配的类型默认返回false
     }
