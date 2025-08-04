@@ -119,4 +119,15 @@ public class EntityScanConfig {
      * Custom type mapper, convert Java type to SQL type. When the custom mapping cannot be mapped, use the default mapping.
      */
     private TypeMapper typeMapper = (t, s) -> null;
+
+    /**
+     * 严格限制数据库字段类型一致
+     * <p>
+     * Strictly limit the consistency of the database field type
+     * <p>
+     * false: String -> varchar(100) OK!
+     * <p>
+     * true: String -> varchar(100) ERROR! And try to change it to varchar(255)
+     */
+    private Boolean strictColumnType = false;
 }

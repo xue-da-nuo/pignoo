@@ -58,7 +58,7 @@ public class EntityScaner {
         }
         switch (pignooConfig.getEngine()) {
         case DatabaseEngine.MySQL:
-            this.databaseChecker = new DatabaseChecker4MySql(dataSource, entityScanConfig.getTypeMapper());
+            this.databaseChecker = new DatabaseChecker4MySql(dataSource, entityScanConfig.getTypeMapper(), entityScanConfig.getStrictColumnType());
             break;
         default:
             throw new RuntimeException("Unknow database engine");

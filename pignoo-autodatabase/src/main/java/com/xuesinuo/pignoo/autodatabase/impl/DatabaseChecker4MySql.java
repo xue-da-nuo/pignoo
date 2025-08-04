@@ -47,9 +47,13 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
 
     private final TypeMapper typeMapper;
 
-    public DatabaseChecker4MySql(DataSource dataSource, TypeMapper typeMapper) {
+    /** 严格匹配数据库的数据类型 */
+    private final boolean strictColumnType;
+
+    public DatabaseChecker4MySql(DataSource dataSource, TypeMapper typeMapper, boolean strictColumnType) {
         this.dataSource = dataSource;
         this.typeMapper = typeMapper;
+        this.strictColumnType = strictColumnType;
     }
 
     @Override
@@ -103,7 +107,8 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                 String sql = """
                         SELECT
                             c.COLUMN_NAME AS `column_name`,
-                            c.DATA_TYPE AS `column_type`,
+                            c.DATA_TYPE AS `data_type`,
+                            c.COLUMN_TYPE AS `column_type`,
                             CASE
                                 WHEN k.COLUMN_NAME IS NOT NULL THEN '1'
                                 ELSE '0'
@@ -111,7 +116,12 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                             CASE
                                 WHEN c.EXTRA = 'auto_increment' THEN '1'
                                 ELSE '0'
-                            END AS `auto`
+                            END AS `auto`,
+                            CASE
+                                WHEN c.IS_NULLABLE = 'YES' THEN '1'
+                                ELSE '0'
+                            END AS `allow_null`,
+                            c.COLUMN_DEFAULT AS `default_value`
                         FROM
                             information_schema.COLUMNS c
                         LEFT JOIN
@@ -167,19 +177,24 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
                     if (column.equals(entityMapper.primaryKeyColumn()) && ciid.get("pk").equals("1") && (entityMapper.autoPrimaryKey() != ciid.get("auto").equals("1"))) {
                         result.getOtherMessage().add("Primary-Key auto setting is error in " + entityMapper.getType().getName() + " and table: " + tableName);
                     }
-                    if (this.javaType2SqlTypeOk(entityMapper.fields().get(i), ciid.get("column_type"))) {
+                    if (!strictColumnType && this.javaType2SqlTypeOk(entityMapper.fields().get(i), ciid.get("data_type"))) {
+                        continue;
+                    }
+                    String columnType = this.javaType2SqlType(entityMapper.fields().get(i));
+                    if (strictColumnType && ciid.get("column_type").toLowerCase().equals(columnType)) {
                         continue;
                     }
                     if (entityMapper.primaryKeyColumn().equals(column) || ciid.get("pk").equals("1")) {
                         result.getOtherMessage().add("Primary-Key type mapping error with " + entityMapper.getType().getName() + " and table: " + tableName);
                         continue;
                     }
-                    String columnType = this.javaType2SqlType(entityMapper.fields().get(i));
                     if (columnType == null || columnType.isBlank()) {
                         result.getOtherMessage().add("'" + column + "' in " + entityMapper.getType().getName() + " can't be mapped to a sql type.");
                         continue;
                     }
-                    sql = "ALTER TABLE `" + tableName + "` MODIFY COLUMN `" + column + "` " + columnType + " ";
+                    sql = "ALTER TABLE `" + tableName + "` MODIFY COLUMN `" + column + "` " + columnType + " "
+                            + (ciid.get("allow_null").equals("0") ? "NOT NULL " : "NULL ")
+                            + (ciid.get("default_value") == null ? "" : "DEFAULT '" + ciid.get("default_value") + "' ");
                     result.getAdvise2UpdateColumn().add(sql);
                 }
             }
