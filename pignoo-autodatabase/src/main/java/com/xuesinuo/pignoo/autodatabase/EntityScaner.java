@@ -206,7 +206,7 @@ public class EntityScaner {
                     """ + workingList.stream().map(sql -> sql + ";\n").collect(Collectors.joining()));
         }
         if (!warn.equals(warningTitle)) {
-            log.error(warn);
+            log.warn(warn);
         }
         if (!workingList.isEmpty()) {
             Connection conn = null;
@@ -225,19 +225,25 @@ public class EntityScaner {
             } catch (SQLException e) {
                 throw new RuntimeException("[Pignoo-Scan] Auto-Database run failed: " + workSql, e);
             } finally {
+                Exception e = null;
                 if (conn != null && autoCommit != null) {
                     try {
                         conn.setAutoCommit(autoCommit);
-                    } catch (SQLException e) {
+                    } catch (SQLException ex) {
+                        e = ex;
                         log.error("[Pignoo-Scan] Set auto commit failed At running auto-database");
                     }
                 }
                 if (conn != null) {
                     try {
                         conn.close();
-                    } catch (SQLException e) {
+                    } catch (SQLException ex) {
+                        e = ex;
                         log.error("[Pignoo-Scan] Close connection failed At running auto-database");
                     }
+                }
+                if (e != null) {
+                    throw new RuntimeException("[Pignoo-Scan] Connetction error", e);
                 }
             }
         }
