@@ -39,7 +39,7 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
      * <p>
      * SQL Executer
      */
-    protected static final SqlExecuter sqlExecuter = SimpleJdbcSqlExecuter.getInstance();
+    protected static final SqlExecuter sqlExecuter = new SimpleJdbcSqlExecuter(false);
 
     private final DataSource dataSource;
 
@@ -281,8 +281,8 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
     private static final List<String> BYTE_TYPES = List.of("tinyint");
     private static final List<String> DOUBLE_TYPES = List.of("double", "float", "real");
     private static final List<String> FLOAT_TYPES = List.of("float", "real");
-    private static final List<String> BOOLEAN_TYPES = List.of("tinyint(1)", "bit(1)", "boolean");
-    private static final List<String> CHARACTER_TYPES = List.of("char(1)", "varchar(1)");
+    private static final List<String> BOOLEAN_TYPES = List.of("tinyint", "bit", "boolean");
+    private static final List<String> CHARACTER_TYPES = List.of("char", "varchar");
     private static final List<String> STRING_TYPES = List.of("char", "varchar", "text", "tinytext", "mediumtext", "longtext", "json");
     private static final List<String> BIG_INTEGER_TYPES = List.of("bigint", "decimal", "numeric");
     private static final List<String> BIG_DECIMAL_TYPES = List.of("decimal", "numeric");
@@ -312,6 +312,7 @@ public class DatabaseChecker4MySql implements DatabaseChecker {
      *         Can it be mapped
      */
     private boolean javaType2SqlTypeOk(Class<?> javaType, String mysqlType) {
+        mysqlType = mysqlType.toLowerCase();
         // 基本数据类型
         if (Long.class.isAssignableFrom(javaType) || long.class.equals(javaType))
             return LONG_TYPES.contains(mysqlType);

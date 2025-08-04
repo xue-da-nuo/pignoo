@@ -13,6 +13,8 @@ import java.util.function.Supplier;
 import com.xuesinuo.pignoo.core.SqlExecuter;
 import com.xuesinuo.pignoo.core.entity.EntityMapper;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,12 +24,14 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author xuesinuo
  * @since 0.1.0
- * @version 0.1.0
+ * @version 0.3.1
  */
 @Slf4j
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimpleJdbcSqlExecuter implements SqlExecuter {
 
-    private SimpleJdbcSqlExecuter() {}
+    private boolean saveLog = true;
 
     private static final SimpleJdbcSqlExecuter instance = new SimpleJdbcSqlExecuter();
 
@@ -47,8 +51,11 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
     /** {@inheritDoc} */
     @Override
     public <E> E selectOne(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c) {
-        log.debug(sql);
-        log.debug(params.toString());
+        long startTime = System.currentTimeMillis();
+        if (saveLog) {
+            log.debug(sql);
+            log.debug(params.toString());
+        }
         EntityMapper<E> mapper = EntityMapper.build(c);
         Connection conn = null;
         try {
@@ -64,6 +71,9 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                             String columnName = mapper.columns().get(i);
                             Object columnValue = rs.getObject(columnName, mapper.fields().get(i).getType());
                             mapper.setters().get(i).invoke(entity, columnValue);
+                        }
+                        if (saveLog) {
+                            log.debug("1 row(s) in " + (System.currentTimeMillis() - startTime) + " ms");
                         }
                         return entity;
                     }
@@ -88,8 +98,11 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
     /** {@inheritDoc} */
     @Override
     public <E> List<E> selectList(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c) {
-        log.debug(sql);
-        log.debug(params.toString());
+        long startTime = System.currentTimeMillis();
+        if (saveLog) {
+            log.debug(sql);
+            log.debug(params.toString());
+        }
         EntityMapper<E> mapper = EntityMapper.build(c);
         ArrayList<E> list = new ArrayList<>();
         Connection conn = null;
@@ -124,15 +137,21 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 connCloser.accept(conn);
             }
         }
+        if (saveLog) {
+            log.debug(list.size() + " row(s) in " + (System.currentTimeMillis() - startTime) + " ms");
+        }
         return list;
     }
 
     /** {@inheritDoc} */
     @Override
     public List<LinkedHashMap<String, String>> selectLinkedHashMap(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params) {
-        log.debug(sql);
-        log.debug(params.toString());
-        List<LinkedHashMap<String, String>> result = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
+        if (saveLog) {
+            log.debug(sql);
+            log.debug(params.toString());
+        }
+        List<LinkedHashMap<String, String>> list = new ArrayList<>();
         Connection conn = null;
         try {
             conn = connGetter.get();
@@ -150,7 +169,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                         for (String columnName : columnNames) {
                             row.put(columnName, rs.getString(columnName));
                         }
-                        result.add(row);
+                        list.add(row);
                     }
                 }
             }
@@ -167,14 +186,20 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 connCloser.accept(conn);
             }
         }
-        return result;
+        if (saveLog) {
+            log.debug(list.size() + " row(s) in " + (System.currentTimeMillis() - startTime) + " ms");
+        }
+        return list;
     }
 
     /** {@inheritDoc} */
     @Override
     public <R> R selectColumn(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<R> c) {
-        log.debug(sql);
-        log.debug(params.toString());
+        long startTime = System.currentTimeMillis();
+        if (saveLog) {
+            log.debug(sql);
+            log.debug(params.toString());
+        }
         Connection conn = null;
         try {
             conn = connGetter.get();
@@ -184,6 +209,9 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 }
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
+                        if (saveLog) {
+                            log.debug("1 row(s) in " + (System.currentTimeMillis() - startTime) + " ms");
+                        }
                         return rs.getObject(1, c);
                     }
                 }
@@ -207,8 +235,11 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
     /** {@inheritDoc} */
     @Override
     public <R> Object insert(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<R> c) {
-        log.debug(sql);
-        log.debug(params.toString());
+        long startTime = System.currentTimeMillis();
+        if (saveLog) {
+            log.debug(sql);
+            log.debug(params.toString());
+        }
         Object primaryKeyValue = null;
         Connection conn = null;
         try {
@@ -239,14 +270,20 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 connCloser.accept(conn);
             }
         }
+        if (saveLog) {
+            log.debug((primaryKeyValue == null ? "0" : "1") + " row(s) in " + (System.currentTimeMillis() - startTime) + " ms");
+        }
         return primaryKeyValue;
     }
 
     /** {@inheritDoc} */
     @Override
     public long update(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params) {
-        log.debug(sql);
-        log.debug(params.toString());
+        long startTime = System.currentTimeMillis();
+        if (saveLog) {
+            log.debug(sql);
+            log.debug(params.toString());
+        }
         Connection conn = null;
         try {
             conn = connGetter.get();
@@ -255,6 +292,9 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                     ps.setObject(entry.getKey() + 1, entry.getValue());
                 }
                 int rowsAffected = ps.executeUpdate();
+                if (saveLog) {
+                    log.debug(rowsAffected + " row(s) in " + (System.currentTimeMillis() - startTime) + " ms");
+                }
                 return rowsAffected;
             }
         } catch (Exception e) {

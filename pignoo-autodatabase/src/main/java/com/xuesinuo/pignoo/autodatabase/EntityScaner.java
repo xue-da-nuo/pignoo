@@ -87,7 +87,7 @@ public class EntityScaner {
             }
         }
         if (packages.isEmpty()) {
-            throw new RuntimeException("[Scan Error] Packages empty");
+            throw new RuntimeException("[Pignoo-Scan Error] Packages empty");
         }
         String[] packageArray = packages.toArray(new String[packages.size()]);
         ClassGraph classGraph = new ClassGraph();
@@ -139,7 +139,8 @@ public class EntityScaner {
     public void scan() {
         DatabaseCheckResult allResult = new DatabaseCheckResult();
         StringBuilder scanClassMsg = new StringBuilder();
-        for (EntityMapper<?> mapper : scanPackage()) {
+        var packageMappers = scanPackage();
+        for (EntityMapper<?> mapper : packageMappers) {
             DatabaseCheckResult itemResult = databaseChecker.check(mapper);
             allResult.getAdvise2AddTable().addAll(itemResult.getAdvise2AddTable());
             allResult.getAdvise2AddColumn().addAll(itemResult.getAdvise2AddColumn());
@@ -148,10 +149,10 @@ public class EntityScaner {
             allResult.getOtherMessage().addAll(itemResult.getOtherMessage());
             scanClassMsg.append(mapper.getType().getName()).append("\n");
         }
-        if (scanClassMsg.length() > 0) {
-            log.info("[Scan] Classes found:\n{}", scanClassMsg);
+        if (!packageMappers.isEmpty()) {
+            log.info("[Pignoo-Scan] Classes found:\n{}", scanClassMsg.toString() + "total " + packageMappers.size() + " entity(s).");
         } else {
-            log.warn("[Scan] No class found");
+            log.warn("[Pignoo-Scan] No class found");
         }
         String warningTitle = """
 
@@ -194,7 +195,7 @@ public class EntityScaner {
                         """ + workingList.stream().map(sql -> sql + ";\n").collect(Collectors.joining()));
             }
             log.error(warn);
-            throw new RuntimeException("[Scan] Database check failed");
+            throw new RuntimeException("[Pignoo-Scan] Database check failed");
         }
         if (!workingList.isEmpty()) {
             log.warn("""
@@ -220,30 +221,30 @@ public class EntityScaner {
                     conn.createStatement().execute(workSql);
                 }
                 conn.commit();
-                log.warn("[Scan] Advise SQLs executed successfully!");
+                log.warn("[Pignoo-Scan] Advise SQLs executed successfully!");
             } catch (SQLException e) {
-                throw new RuntimeException("[Scan] Auto-Database run failed: " + workSql, e);
+                throw new RuntimeException("[Pignoo-Scan] Auto-Database run failed: " + workSql, e);
             } finally {
                 if (conn != null && autoCommit != null) {
                     try {
                         conn.setAutoCommit(autoCommit);
                     } catch (SQLException e) {
-                        log.error("[Scan] Set auto commit failed At running auto-database");
+                        log.error("[Pignoo-Scan] Set auto commit failed At running auto-database");
                     }
                 }
                 if (conn != null) {
                     try {
                         conn.close();
                     } catch (SQLException e) {
-                        log.error("[Scan] Close connection failed At running auto-database");
+                        log.error("[Pignoo-Scan] Close connection failed At running auto-database");
                     }
                 }
             }
         }
         if (warning.toString().equals(warningTitle) && workingList.isEmpty()) {
-            log.info("[Scan Result] Nothing to do");
+            log.info("[Pignoo-Scan Result] Nothing to do");
         } else {
-            log.info("[Scan Result] Done");
+            log.info("[Pignoo-Scan Result] Done");
         }
     }
 }
