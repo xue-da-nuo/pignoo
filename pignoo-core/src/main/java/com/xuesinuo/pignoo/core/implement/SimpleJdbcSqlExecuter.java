@@ -3,6 +3,7 @@ package com.xuesinuo.pignoo.core.implement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.function.Supplier;
 
 import com.xuesinuo.pignoo.core.SqlExecuter;
 import com.xuesinuo.pignoo.core.entity.EntityMapper;
+import com.xuesinuo.pignoo.core.exception.PignooRuntimeException;
+import com.xuesinuo.pignoo.core.exception.SqlExecuteException;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -80,13 +83,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 }
             }
         } catch (Exception e) {
-            RuntimeException ex;
-            if (e instanceof RuntimeException) {
-                ex = (RuntimeException) e;
-            } else {
-                ex = new RuntimeException(e);
-            }
-            throw ex;
+            throw handleException(e);
         } finally {
             if (conn != null) {
                 connCloser.accept(conn);
@@ -125,13 +122,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 }
             }
         } catch (Exception e) {
-            RuntimeException ex;
-            if (e instanceof RuntimeException) {
-                ex = (RuntimeException) e;
-            } else {
-                ex = new RuntimeException(e);
-            }
-            throw ex;
+            throw handleException(e);
         } finally {
             if (conn != null) {
                 connCloser.accept(conn);
@@ -174,13 +165,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 }
             }
         } catch (Exception e) {
-            RuntimeException ex;
-            if (e instanceof RuntimeException) {
-                ex = (RuntimeException) e;
-            } else {
-                ex = new RuntimeException(e);
-            }
-            throw ex;
+            throw handleException(e);
         } finally {
             if (conn != null) {
                 connCloser.accept(conn);
@@ -217,13 +202,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 }
             }
         } catch (Exception e) {
-            RuntimeException ex;
-            if (e instanceof RuntimeException) {
-                ex = (RuntimeException) e;
-            } else {
-                ex = new RuntimeException(e);
-            }
-            throw ex;
+            throw handleException(e);
         } finally {
             if (conn != null) {
                 connCloser.accept(conn);
@@ -258,13 +237,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 }
             }
         } catch (Exception e) {
-            RuntimeException ex;
-            if (e instanceof RuntimeException) {
-                ex = (RuntimeException) e;
-            } else {
-                ex = new RuntimeException(e);
-            }
-            throw ex;
+            throw handleException(e);
         } finally {
             if (conn != null) {
                 connCloser.accept(conn);
@@ -298,13 +271,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                 return rowsAffected;
             }
         } catch (Exception e) {
-            RuntimeException ex;
-            if (e instanceof RuntimeException) {
-                ex = (RuntimeException) e;
-            } else {
-                ex = new RuntimeException(e);
-            }
-            throw ex;
+            throw handleException(e);
         } finally {
             if (conn != null) {
                 connCloser.accept(conn);
@@ -312,4 +279,10 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
         }
     }
 
+    private static final RuntimeException handleException(Exception e) {
+        if (e instanceof SQLException) {
+            return new SqlExecuteException((SQLException) e);
+        }
+        return new PignooRuntimeException(e);
+    }
 }
