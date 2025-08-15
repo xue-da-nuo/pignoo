@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.annotation.Column;
-import com.xuesinuo.pignoo.core.annotation.Ignore;
 import com.xuesinuo.pignoo.core.annotation.Link;
 import com.xuesinuo.pignoo.core.annotation.Table;
 import com.xuesinuo.pignoo.core.config.AnnotationMode;
@@ -87,11 +86,11 @@ public class ClassInfo<E> {
         }
         Field[] classFields = c.getDeclaredFields();
         for (Field field : classFields) {
-            if (field.isAnnotationPresent(Ignore.class)) {
-                continue;
-            }
             Column columnAnn = field.getAnnotation(Column.class);
             if (columnAnn == null && config.getAnnotationMode() == AnnotationMode.MUST) {
+                continue;
+            }
+            if (columnAnn != null && columnAnn.ignore()) {
                 continue;
             }
             if (columnAnn != null && (columnAnn.primaryKey() == Column.PrimaryKey.AUTO || columnAnn.primaryKey() == Column.PrimaryKey.NON_AUTO)) {
@@ -163,7 +162,7 @@ public class ClassInfo<E> {
             Field primaryKeyField = this.fields.get(indexOfPk);
             if (this.primaryKeyField.isAnnotationPresent(Column.class)) {
                 Column columnAnn = primaryKeyField.getAnnotation(Column.class);
-                if (columnAnn != null && columnAnn.primaryKey() == Column.PrimaryKey.NOT) {
+                if (columnAnn != null && (columnAnn.primaryKey() == Column.PrimaryKey.NOT || columnAnn.ignore())) {
                     throw new MapperException("Entity " + c.getName() + " PrimaryKey not found");
                 }
             }

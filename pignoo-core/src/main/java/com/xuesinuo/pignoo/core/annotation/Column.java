@@ -20,6 +20,17 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD })
 public @interface Column {
     /**
+     * 强制忽略此字段，不进行映射
+     * <p>
+     * Force ignore this field, not mapping
+     * 
+     * @return 是否忽略
+     *         <p>
+     *         Whether to ignore
+     */
+    boolean ignore() default false;
+
+    /**
      * 数据库列名
      * <p>
      * Database column name
