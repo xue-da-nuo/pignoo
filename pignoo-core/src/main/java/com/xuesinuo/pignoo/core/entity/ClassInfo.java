@@ -67,6 +67,11 @@ public class ClassInfo<E> {
         if (tableAnn != null) {
             this.tableName = tableAnn.value().trim();
         }
+        ClassInfo<?> linkClassInfo = null;
+        if (linkAnn != null) {
+            linkClassInfo = new ClassInfo<>(linkAnn.value(), config);
+            this.tableName = linkClassInfo.tableName;
+        }
         if (this.tableName == null || this.tableName.isBlank()) {
             if (config.getAnnotationMode() == AnnotationMode.MIX) {
                 if (config.getAnnotationMixMode() == AnnotationMixMode.SAME) {
@@ -170,9 +175,7 @@ public class ClassInfo<E> {
             this.primaryKeyGetter = this.getters.get(indexOfPk);
             this.primaryKeySetter = this.setters.get(indexOfPk);
         }
-        if (linkAnn != null) {
-            ClassInfo<?> linkClassInfo = new ClassInfo<>(linkAnn.value(), config);
-            this.tableName = linkClassInfo.tableName;
+        if (linkAnn != null && linkClassInfo != null) {
             int fieldsCount = this.fields.size();
             for (int i = fieldsCount - 1; i >= 0; i--) {
                 if (!linkClassInfo.columns.contains(this.columns.get(i))) {
