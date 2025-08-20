@@ -86,7 +86,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         });
     }
 
-    /** {@inheritDoc} */
     @Override
     public E getOne() {
         E e = super.getOne();
@@ -113,7 +112,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return entityProxyFactory.build(e);
     }
 
-    /** {@inheritDoc} */
     @Override
     public List<E> getAll() {
         StringBuilder sql = new StringBuilder("");
@@ -137,7 +135,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return eList;
     }
 
-    /** {@inheritDoc} */
     @Override
     public List<E> get(long offset, long limit) {
         StringBuilder sql = new StringBuilder("");
@@ -162,7 +159,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return eList;
     }
 
-    /** {@inheritDoc} */
     @Override
     public E add(E e) {
         StringBuilder sql = new StringBuilder("");
@@ -212,7 +208,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return entityProxyFactory.build(e);
     }
 
-    /** {@inheritDoc} */
     @Override
     public long mixById(E e) {
         Object primaryKeyValue = null;
@@ -254,7 +249,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
-    /** {@inheritDoc} */
     @Override
     public long replaceById(E e) {
         Object primaryKeyValue = null;
@@ -294,7 +288,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
-    /** {@inheritDoc} */
     @Override
     public long mixAll(E e) {
         StringBuilder sql = new StringBuilder("");
@@ -327,7 +320,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
-    /** {@inheritDoc} */
     @Override
     public long replaceAll(E e) {
         StringBuilder sql = new StringBuilder("");
@@ -358,7 +350,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
-    /** {@inheritDoc} */
     @Override
     public long removeById(E e) {
         Object primaryKeyValue = null;
@@ -382,7 +373,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
-    /** {@inheritDoc} */
     @Override
     public long removeAll() {
         StringBuilder sql = new StringBuilder("");
@@ -396,7 +386,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return sqlExecuter.update(connGetter, connCloser, sql.toString(), sqlParam.params);
     }
 
-    /** {@inheritDoc} */
     @Override
     public <R> R sum(Function<E, R> field, Class<R> c) {
         StringBuilder sql = new StringBuilder("");
@@ -410,7 +399,6 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return sqlExecuter.selectColumn(connGetter, connCloser, sql.toString(), sqlParam.params, c);
     }
 
-    /** {@inheritDoc} */
     @Override
     public <R> R avg(Function<E, R> field, Class<R> c) {
         StringBuilder sql = new StringBuilder("");
@@ -424,62 +412,53 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
         return sqlExecuter.selectColumn(connGetter, connCloser, sql.toString(), sqlParam.params, c);
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isReadOnly() {
         return false;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> sort(Function<E, ?> field, PignooSorter.SMode mode) {
         super.sort(field, mode);
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> sort(PignooSorter<E> sorter) {
         super.sort(sorter);
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> filter(Boolean condition, Function<E, ?> field, PignooFilter.FMode mode, Object... values) {
         super.filter(condition, field, mode, values);
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> filter(Boolean condition, Function<E, ?> field, String mode, Object... values) {
         super.filter(condition, field, mode, values);
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values) {
         super.filter(field, mode, values);
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> filter(Function<E, ?> field, String mode, Object... values) {
         super.filter(field, mode, values);
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> filter(PignooFilter<E> filter) {
         super.filter(filter);
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder) {
         super.filter(filterBuilder);

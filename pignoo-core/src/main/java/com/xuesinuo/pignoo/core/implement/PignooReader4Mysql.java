@@ -84,7 +84,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         this.entityMapper = EntityMapper.build(c, config);
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooWriter<E> copyWriter() {
         PignooWriter4Mysql<E> pignooWriter = new PignooWriter4Mysql<>(pignoo, connGetter, connCloser, inTransaction, c, config);
@@ -93,7 +92,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return pignooWriter;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> copyReader() {
         PignooReader4Mysql<E> pignooWriter = new PignooReader4Mysql<>(pignoo, connGetter, connCloser, inTransaction, c, config);
@@ -228,7 +226,7 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
             Collection<Object> values = filter.getValues().stream().filter(p -> p != null).toList();
             int valueCount = values.size();
             boolean hasNull = false;
-            if (filter.getMode() == FMode.IN || filter.getMode() == FMode.NOT_IN || filter.getMode() == FMode.EQ || filter.getMode() == FMode.NE) {
+            if (filter.getMode() == FMode.IN || filter.getMode() == FMode.NOT_IN || filter.getMode() == FMode.EQ || filter.getMode() == FMode.NE || filter.getMode() == FMode.NOT_LIKE) {
                 if (filter.getValues().size() != valueCount) {
                     valueCount += 1;
                     hasNull = true;
@@ -257,12 +255,17 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
                     sql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL ";
                 } else if (filter.getMode() == FMode.NE) {
                     sql += "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NOT NULL ";
+                } else if (filter.getMode() == FMode.NOT_LIKE) {
+                    // DO NOTHING
                 } else {
                     throw new MapperException(filter.getMode() + " can not be NULL -> " +
                             this.entityMapper.tableName() + "." + this.entityMapper.getColumnByFunction(filter.getField()));
                 }
             } else {
                 if (filter.getMode() == FMode.NOT_IN) {
+                    sql = "(" + sql + (sql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
+                }
+                if (filter.getMode() == FMode.NOT_LIKE) {
                     sql = "(" + sql + (sql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
                 }
             }
@@ -294,7 +297,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return sql.toString();
     }
 
-    /** {@inheritDoc} */
     @Override
     public E getOne() {
         StringBuilder sql = new StringBuilder("");
@@ -304,8 +306,11 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         sql.append("FROM ");
         sql.append("`" + entityMapper.tableName() + "` ");
         if (filter != null) {
-            sql.append("WHERE ");
-            sql.append(filter2Sql(filter, sqlParam));
+            String sqlWhere = filter2Sql(filter, sqlParam);
+            if (sqlWhere != null && !sqlWhere.isBlank()) {
+                sql.append("WHERE ");
+                sql.append(sqlWhere);
+            }
         }
         if (sorter != null) {
             sql.append("ORDER BY ");
@@ -316,7 +321,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return e;
     }
 
-    /** {@inheritDoc} */
     @Override
     public List<E> getAll() {
         StringBuilder sql = new StringBuilder("");
@@ -326,8 +330,11 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         sql.append("FROM ");
         sql.append("`" + entityMapper.tableName() + "` ");
         if (filter != null) {
-            sql.append("WHERE ");
-            sql.append(filter2Sql(filter, sqlParam));
+            String sqlWhere = filter2Sql(filter, sqlParam);
+            if (sqlWhere != null && !sqlWhere.isBlank()) {
+                sql.append("WHERE ");
+                sql.append(sqlWhere);
+            }
         }
         if (sorter != null) {
             sql.append("ORDER BY ");
@@ -337,7 +344,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return eList;
     }
 
-    /** {@inheritDoc} */
     @Override
     public List<E> get(long offset, long limit) {
         StringBuilder sql = new StringBuilder("");
@@ -347,8 +353,11 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         sql.append("FROM ");
         sql.append("`" + entityMapper.tableName() + "` ");
         if (filter != null) {
-            sql.append("WHERE ");
-            sql.append(filter2Sql(filter, sqlParam));
+            String sqlWhere = filter2Sql(filter, sqlParam);
+            if (sqlWhere != null && !sqlWhere.isBlank()) {
+                sql.append("WHERE ");
+                sql.append(sqlWhere);
+            }
         }
         if (sorter != null) {
             sql.append("ORDER BY ");
@@ -359,7 +368,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return eList;
     }
 
-    /** {@inheritDoc} */
     @Override
     public long size() {
         StringBuilder sql = new StringBuilder("");
@@ -367,14 +375,16 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         sql.append("SELECT COUNT(*) FROM ");
         sql.append("`" + entityMapper.tableName() + "` ");
         if (filter != null) {
-            sql.append("WHERE ");
-            sql.append(filter2Sql(filter, sqlParam));
+            String sqlWhere = filter2Sql(filter, sqlParam);
+            if (sqlWhere != null && !sqlWhere.isBlank()) {
+                sql.append("WHERE ");
+                sql.append(sqlWhere);
+            }
         }
         Long size = sqlExecuter.selectColumn(connGetter, connCloser, sql.toString(), sqlParam.params, Long.class);
         return size == null ? 0L : size;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> sort(Function<E, ?> field, PignooSorter.SMode mode) {
         if (this.sorter == null) {
@@ -385,7 +395,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> sort(PignooSorter<E> sorter) {
         if (this.sorter == null) {
@@ -396,7 +405,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> filter(Boolean condition, Function<E, ?> field, PignooFilter.FMode mode, Object... values) {
         if (condition != null && condition) {
@@ -405,7 +413,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> filter(Boolean condition, Function<E, ?> field, String mode, Object... values) {
         if (condition != null && condition) {
@@ -414,7 +421,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values) {
         if (this.filter == null) {
@@ -425,13 +431,11 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> filter(Function<E, ?> field, String mode, Object... values) {
         return filter(field, FMode.getFMode(mode), values);
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> filter(PignooFilter<E> filter) {
         if (this.filter == null) {
@@ -442,7 +446,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public PignooReader<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder) {
         PignooFilter<E> filter = new PignooFilter<>();
@@ -454,7 +457,6 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         return this;
     }
 
-    /** {@inheritDoc} */
     @Override
     public <R> R sum(Function<E, R> field, Class<R> c) {
         StringBuilder sql = new StringBuilder("");
@@ -462,13 +464,15 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         sql.append("SELECT SUM(`" + entityMapper.getColumnByFunction(field) + "`) ");
         sql.append("FROM `" + entityMapper.tableName() + "` ");
         if (filter != null) {
-            sql.append("WHERE ");
-            sql.append(filter2Sql(filter, sqlParam));
+            String sqlWhere = filter2Sql(filter, sqlParam);
+            if (sqlWhere != null && !sqlWhere.isBlank()) {
+                sql.append("WHERE ");
+                sql.append(sqlWhere);
+            }
         }
         return sqlExecuter.selectColumn(connGetter, connCloser, sql.toString(), sqlParam.params, c);
     }
 
-    /** {@inheritDoc} */
     @Override
     public <R> R avg(Function<E, R> field, Class<R> c) {
         StringBuilder sql = new StringBuilder("");
@@ -476,13 +480,15 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         sql.append("SELECT AVG(`" + entityMapper.getColumnByFunction(field) + "`) ");
         sql.append("FROM `" + entityMapper.tableName() + "` ");
         if (filter != null) {
-            sql.append("WHERE ");
-            sql.append(filter2Sql(filter, sqlParam));
+            String sqlWhere = filter2Sql(filter, sqlParam);
+            if (sqlWhere != null && !sqlWhere.isBlank()) {
+                sql.append("WHERE ");
+                sql.append(sqlWhere);
+            }
         }
         return sqlExecuter.selectColumn(connGetter, connCloser, sql.toString(), sqlParam.params, c);
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isReadOnly() {
         return true;

@@ -109,7 +109,6 @@ public class TransactionPignoo implements Pignoo {
 
     private Consumer<Connection> connCloser = (conn) -> {};
 
-    /** {@inheritDoc} */
     @Override
     public <E> PignooWriter<E> writer(Class<E> c) {
         switch (this.config.getEngine()) {
@@ -119,7 +118,6 @@ public class TransactionPignoo implements Pignoo {
         throw new DataSourceException("Unknow database engine");
     }
 
-    /** {@inheritDoc} */
     @Override
     public <E> PignooReader<E> reader(Class<E> c) {
         switch (this.config.getEngine()) {
@@ -146,7 +144,6 @@ public class TransactionPignoo implements Pignoo {
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public synchronized void close() {
         if (hasClosed) {
@@ -175,7 +172,6 @@ public class TransactionPignoo implements Pignoo {
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean closed() {
         return hasClosed;

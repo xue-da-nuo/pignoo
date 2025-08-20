@@ -125,35 +125,27 @@ public interface PignooWriter<E> extends PignooReader<E> {
      */
     long removeAll();
 
-    /** {@inheritDoc} */
     @Override
     PignooWriter<E> sort(Function<E, ?> field, PignooSorter.SMode mode);
 
-    /** {@inheritDoc} */
     @Override
     PignooWriter<E> sort(PignooSorter<E> sorter);
 
-    /** {@inheritDoc} */
     @Override
     PignooWriter<E> filter(Boolean condition, Function<E, ?> field, PignooFilter.FMode mode, Object... values);
 
-    /** {@inheritDoc} */
     @Override
     PignooWriter<E> filter(Boolean condition, Function<E, ?> field, String mode, Object... values);
 
-    /** {@inheritDoc} */
     @Override
     PignooWriter<E> filter(Function<E, ?> field, PignooFilter.FMode mode, Object... values);
 
-    /** {@inheritDoc} */
     @Override
     PignooWriter<E> filter(Function<E, ?> field, String mode, Object... values);
 
-    /** {@inheritDoc} */
     @Override
     PignooWriter<E> filter(PignooFilter<E> filter);
 
-    /** {@inheritDoc} */
     @Override
     PignooWriter<E> filter(Function<PignooFilter<E>, PignooFilter<E>> filterBuilder);
 

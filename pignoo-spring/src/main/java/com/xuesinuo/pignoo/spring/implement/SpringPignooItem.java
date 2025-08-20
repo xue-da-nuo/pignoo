@@ -98,7 +98,6 @@ public class SpringPignooItem implements Pignoo {
         DataSourceUtils.releaseConnection(conn, this.getDataSource());
     };
 
-    /** {@inheritDoc} */
     @Override
     public <E> PignooWriter<E> writer(Class<E> c) {
         switch (this.config.getEngine()) {
@@ -108,7 +107,6 @@ public class SpringPignooItem implements Pignoo {
         throw new DataSourceException("Unknow database engine");
     }
 
-    /** {@inheritDoc} */
     @Override
     public <E> PignooReader<E> reader(Class<E> c) {
         switch (this.config.getEngine()) {
@@ -118,14 +116,12 @@ public class SpringPignooItem implements Pignoo {
         throw new DataSourceException("Unknow database engine");
     }
 
-    /** {@inheritDoc} */
     @Override
     public void close() {
         this.hasClosed = true;
         this.dataSource = null;
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean closed() {
         return hasClosed;

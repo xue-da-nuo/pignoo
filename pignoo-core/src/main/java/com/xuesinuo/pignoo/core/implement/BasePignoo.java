@@ -122,7 +122,6 @@ public class BasePignoo implements Pignoo {
         }
     };
 
-    /** {@inheritDoc} */
     @Override
     public <E> PignooWriter<E> writer(Class<E> c) {
         switch (this.config.getEngine()) {
@@ -132,7 +131,6 @@ public class BasePignoo implements Pignoo {
         throw new DataSourceException("Unknow database engine");
     }
 
-    /** {@inheritDoc} */
     @Override
     public <E> PignooReader<E> reader(Class<E> c) {
         switch (this.config.getEngine()) {
@@ -142,7 +140,6 @@ public class BasePignoo implements Pignoo {
         throw new DataSourceException("Unknow database engine");
     }
 
-    /** {@inheritDoc} */
     @Override
     public void close() {
         this.hasClosed = true;
@@ -158,7 +155,6 @@ public class BasePignoo implements Pignoo {
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean closed() {
         return this.hasClosed;

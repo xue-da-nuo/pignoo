@@ -20,7 +20,6 @@ public class PignooTransactionSynchronizationAdapter implements TransactionSynch
 
     private final SpringPignoo springPignoo;
 
-    /** {@inheritDoc} */
     @Override
     public void afterCompletion(int status) {
         springPignoo.closeSpringTransaction();

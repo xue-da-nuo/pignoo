@@ -160,7 +160,7 @@ public class ClassInfo<E> {
                 this.autoPrimaryKey = config.getAutoPrimaryKey();
             }
             Field primaryKeyField = this.fields.get(indexOfPk);
-            if (this.primaryKeyField.isAnnotationPresent(Column.class)) {
+            if (primaryKeyField.isAnnotationPresent(Column.class)) {
                 Column columnAnn = primaryKeyField.getAnnotation(Column.class);
                 if (columnAnn != null && (columnAnn.primaryKey() == Column.PrimaryKey.NOT || columnAnn.ignore())) {
                     throw new MapperException("Entity " + c.getName() + " PrimaryKey not found");

@@ -113,13 +113,11 @@ public class SpringPignoo implements Pignoo {
         this.basePignoo = new SpringPignooItem(dataSource, pignooConfig, false);
     }
 
-    /** {@inheritDoc} */
     @Override
     public <E> PignooWriter<E> writer(Class<E> c) {
         return this.getPignoo().writer(c);
     }
 
-    /** {@inheritDoc} */
     @Override
     public <E> PignooReader<E> reader(Class<E> c) {
         return this.getPignoo().reader(c);
@@ -163,7 +161,6 @@ public class SpringPignoo implements Pignoo {
         log.debug("Once Spring-Pignoo transaction finished!");
     }
 
-    /** {@inheritDoc} */
     @Override
     public void close() {
         this.basePignoo.close();
@@ -173,7 +170,6 @@ public class SpringPignoo implements Pignoo {
         log.warn("Spring-Pignoo closed! Please confirm that the SpringIoC container is also closed, otherwise this is an abnormal shutdown!");
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean closed() {
         return this.hasClosed;

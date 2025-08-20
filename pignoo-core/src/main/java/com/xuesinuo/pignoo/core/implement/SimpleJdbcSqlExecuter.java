@@ -51,7 +51,6 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
         return instance;
     }
 
-    /** {@inheritDoc} */
     @Override
     public <E> E selectOne(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c) {
         long startTime = System.currentTimeMillis();
@@ -92,7 +91,6 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
         return null;
     }
 
-    /** {@inheritDoc} */
     @Override
     public <E> List<E> selectList(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c) {
         long startTime = System.currentTimeMillis();
@@ -134,7 +132,6 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
         return list;
     }
 
-    /** {@inheritDoc} */
     @Override
     public List<LinkedHashMap<String, String>> selectLinkedHashMap(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params) {
         long startTime = System.currentTimeMillis();
@@ -177,7 +174,6 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
         return list;
     }
 
-    /** {@inheritDoc} */
     @Override
     public <R> R selectColumn(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<R> c) {
         long startTime = System.currentTimeMillis();
@@ -211,7 +207,6 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
         return null;
     }
 
-    /** {@inheritDoc} */
     @Override
     public <R> Object insert(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<R> c) {
         long startTime = System.currentTimeMillis();
@@ -249,7 +244,6 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
         return primaryKeyValue;
     }
 
-    /** {@inheritDoc} */
     @Override
     public long update(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params) {
         long startTime = System.currentTimeMillis();
