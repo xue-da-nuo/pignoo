@@ -56,7 +56,7 @@ public class PignooConfig {
     private AnnotationMode annotationMode = AnnotationMode.MIX;
 
     /**
-     * 注解混合使用方式（当annotationMode=MIX时生效）
+     * 注解混合使用方式
      * <p>
      * Annotation mixed usage(when annotationMode=MIX is effective)
      * 
