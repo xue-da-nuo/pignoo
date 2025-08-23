@@ -299,6 +299,7 @@ Gru gru = new Gru(dataSource, config);
 
 ## TODO List
 
+- [ ] SpringAOP替换为ByteBuddy
 - [ ] 全局配置允许关闭代理
 - [ ] 支持PostgreSQL
 - [ ] 自定义非标准数据类型映射规则
