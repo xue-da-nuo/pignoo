@@ -84,7 +84,7 @@ public class PignooConfig {
     private Boolean autoPrimaryKey = true;
 
     /**
-     * 在执行Setter时，自动更新数据库
+     * writer执行Setter时，自动更新数据库
      * <p>
      * Automatically update the database when executing the Setter
      * 

@@ -34,7 +34,7 @@ import com.xuesinuo.pignoo.core.exception.MapperException;
  */
 public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements PignooWriter<E> {
 
-    private final EntityProxyFactory<E> entityProxyFactory;
+    protected final EntityProxyFactory<E> entityProxyFactory;
 
     /**
      * 构造器

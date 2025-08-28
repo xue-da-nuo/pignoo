@@ -4,6 +4,7 @@ package com.xuesinuo.pignoo.core.implement;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -13,7 +14,6 @@ import java.util.stream.Collectors;
 import com.xuesinuo.pignoo.core.Pignoo;
 import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.PignooFilter;
-import com.xuesinuo.pignoo.core.PignooWriter;
 import com.xuesinuo.pignoo.core.PignooReader;
 import com.xuesinuo.pignoo.core.PignooSorter;
 import com.xuesinuo.pignoo.core.SqlExecuter;
@@ -34,7 +34,7 @@ import com.xuesinuo.pignoo.core.exception.MapperException;
  * @since 0.2.3
  * @version 1.1.0
  */
-public class PignooReader4Mysql<E> implements PignooReader<E> {
+public class PignooReader4Mysql<E> implements PignooReader<E>, Iterable<E> {
 
     /**
      * SQL执行器
@@ -86,7 +86,7 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
     }
 
     @Override
-    public PignooWriter<E> copyWriter() {
+    public PignooWriter4Mysql<E> copyWriter() {
         PignooWriter4Mysql<E> pignooWriter = new PignooWriter4Mysql<>(pignoo, connGetter, connCloser, inTransaction, c, config);
         pignooWriter.filter = PignooFilter.copy(filter);
         pignooWriter.sorter = PignooSorter.copy(sorter);
@@ -94,7 +94,7 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
     }
 
     @Override
-    public PignooReader<E> copyReader() {
+    public PignooReader4Mysql<E> copyReader() {
         PignooReader4Mysql<E> pignooWriter = new PignooReader4Mysql<>(pignoo, connGetter, connCloser, inTransaction, c, config);
         pignooWriter.filter = PignooFilter.copy(filter);
         pignooWriter.sorter = PignooSorter.copy(sorter);
@@ -719,5 +719,25 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         }
         Long size = sqlExecuter.selectColumn(connGetter, connCloser, sql.toString(), sqlParam.params, Long.class);
         return size != null && size.intValue() == collection.size();
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new PignooIterator4Mysql<>(this, this.c, this.isReadOnly(), 100, 0, Long.MAX_VALUE, SMode.MIN_FIRST);
+    }
+
+    @Override
+    public Iterator<E> iterator(int step) {
+        return new PignooIterator4Mysql<>(this, this.c, this.isReadOnly(), step, 0, Long.MAX_VALUE, SMode.MIN_FIRST);
+    }
+
+    @Override
+    public Iterator<E> iterator(int step, SMode idSortMode) {
+        return new PignooIterator4Mysql<>(this, this.c, this.isReadOnly(), step, 0, Long.MAX_VALUE, idSortMode);
+    }
+
+    @Override
+    public Iterator<E> iterator(int step, SMode idSortMode, long offset, long limit) {
+        return new PignooIterator4Mysql<>(this, this.c, this.isReadOnly(), step, offset, limit, idSortMode);
     }
 }

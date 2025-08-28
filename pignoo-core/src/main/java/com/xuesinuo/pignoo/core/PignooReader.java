@@ -1,8 +1,11 @@
 package com.xuesinuo.pignoo.core;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+
+import com.xuesinuo.pignoo.core.PignooSorter.SMode;
 
 /**
  * PignooReader是Pignoo提供的读取用List，直接实现PignooReader一般视为只读的List
@@ -495,4 +498,65 @@ public interface PignooReader<E> {
      * @return 是否全包含指定ID
      */
     boolean containsIds(Collection<E> collection);
+
+    /**
+     * 默认迭代器：按ID从前到后遍历全部数据
+     * <p>
+     * Default iterator: Traverse all data from front to back by ID
+     * <p>
+     * reader获取的遍历器是只读的，writer获取的遍历器是可写的
+     * <p>
+     * The iterator obtained by 'reader' is read-only, and the iterator obtained by 'writer' is writable
+     * 
+     * @return iterator
+     */
+    Iterator<E> iterator();
+
+    /**
+     * 步长迭代器
+     * <p>
+     * Step iterator
+     * 
+     * @param step 步长：每次从数据源查询这么多条并缓存，遍历完后再查询
+     *             <p>
+     *             Step: How many to query each time, and then query again when the data is traversed
+     * @return iterator
+     */
+    Iterator<E> iterator(int step);
+
+    /**
+     * 含排序方式的步长迭代器
+     * <p>
+     * Step iterator with sort mode
+     * 
+     * @param step       步长：每次从数据源查询这么多条并缓存，遍历完后再查询
+     *                   <p>
+     *                   Step: How many to query each time, and then query again when the data is traversed
+     * @param idSortMode ID排序方式
+     *                   <p>
+     *                   ID sort mode
+     * @return iterator
+     */
+    Iterator<E> iterator(int step, SMode idSortMode);
+
+    /**
+     * 含偏移量、总条数的步长迭代器
+     * <p>
+     * Step iterator with offset and limit
+     * 
+     * @param step       步长：每次从数据源查询这么多条并缓存，遍历完后再查询
+     *                   <p>
+     *                   Step: How many to query each time, and then query again when the data is traversed
+     * @param idSortMode ID排序方式
+     *                   <p>
+     *                   ID sort mode
+     * @param offset     偏移量：跳过offset条数据后开始遍历
+     *                   <p>
+     *                   Skip 'offset' data and start traversing
+     * @param limit      总条数：最多遍历limit条数据
+     *                   <p>
+     *                   Maximum number of data to traverse
+     * @return iterator
+     */
+    Iterator<E> iterator(int step, SMode idSortMode, long offset, long limit);
 }
