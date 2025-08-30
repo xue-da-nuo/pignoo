@@ -96,28 +96,38 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
 
     @Override
     public E getFirst() {
-        E e = super.getFirst();
-        if (e != null && inTransaction) {
+        E e;
+        if (inTransaction) {
+            StringBuilder sql = new StringBuilder("");
+            SqlParam sqlParam = new SqlParam();
+            sql.append("SELECT ");
+            sql.append("`" + entityMapper.primaryKeyColumn() + "` ");
+            sql.append("FROM ");
+            sql.append("`" + entityMapper.tableName() + "` ");
+            if (filter != null) {
+                String sqlWhere = filter2Sql(filter, sqlParam);
+                if (sqlWhere != null && !sqlWhere.isBlank()) {
+                    sql.append("WHERE ");
+                    sql.append(sqlWhere);
+                }
+            }
+            if (sorter != null) {
+                sql.append("ORDER BY ");
+                sql.append(sorter2Sql(sorter));
+            }
+            sql.append("LIMIT 1 ");
             StringBuilder sql2 = new StringBuilder("");
-            SqlParam sqlParam2 = new SqlParam();
-            Object primaryKeyValue = null;
-            try {
-                primaryKeyValue = entityMapper.primaryKeyGetter().invoke(e);
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new MapperException("Primary key is not found " + e, ex);
-            }
-            if (primaryKeyValue == null) {
-                throw new MapperException("Primary key is null " + e);
-            }
             sql2.append("SELECT ");
             sql2.append(entityMapper.columns().stream().map(column -> "`" + column + "`").collect(Collectors.joining(",")) + " ");
             sql2.append("FROM ");
             sql2.append("`" + entityMapper.tableName() + "` ");
-            sql2.append("WHERE `" + entityMapper.primaryKeyColumn() + "`=" + sqlParam2.next(primaryKeyValue) + " ");
+            sql2.append("WHERE `" + entityMapper.primaryKeyColumn() + "`=(" + sql.toString() + ") ");
             sql2.append("FOR UPDATE ");
-            e = sqlExecuter.selectOne(connGetter, connCloser, sql2.toString(), sqlParam2.params, c);
+            e = sqlExecuter.selectOne(connGetter, connCloser, sql2.toString(), sqlParam.params, c);
+        } else {
+            e = super.getFirst();
         }
-        if (entityProxyFactory != null) {
+        if (entityProxyFactory != null && e != null) {
             e = entityProxyFactory.build(e);
         }
         return e;
@@ -125,28 +135,34 @@ public class PignooWriter4Mysql<E> extends PignooReader4Mysql<E> implements Pign
 
     @Override
     public E getAny() {
-        E e = super.getAny();
-        if (e != null && inTransaction) {
+        E e;
+        if (inTransaction) {
+            StringBuilder sql = new StringBuilder("");
+            SqlParam sqlParam = new SqlParam();
+            sql.append("SELECT ");
+            sql.append("`" + entityMapper.primaryKeyColumn() + "` ");
+            sql.append("FROM ");
+            sql.append("`" + entityMapper.tableName() + "` ");
+            if (filter != null) {
+                String sqlWhere = filter2Sql(filter, sqlParam);
+                if (sqlWhere != null && !sqlWhere.isBlank()) {
+                    sql.append("WHERE ");
+                    sql.append(sqlWhere);
+                }
+            }
+            sql.append("LIMIT 1 ");
             StringBuilder sql2 = new StringBuilder("");
-            SqlParam sqlParam2 = new SqlParam();
-            Object primaryKeyValue = null;
-            try {
-                primaryKeyValue = entityMapper.primaryKeyGetter().invoke(e);
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new MapperException("Primary key is not found " + e, ex);
-            }
-            if (primaryKeyValue == null) {
-                throw new MapperException("Primary key is null " + e);
-            }
             sql2.append("SELECT ");
             sql2.append(entityMapper.columns().stream().map(column -> "`" + column + "`").collect(Collectors.joining(",")) + " ");
             sql2.append("FROM ");
             sql2.append("`" + entityMapper.tableName() + "` ");
-            sql2.append("WHERE `" + entityMapper.primaryKeyColumn() + "`=" + sqlParam2.next(primaryKeyValue) + " ");
+            sql2.append("WHERE `" + entityMapper.primaryKeyColumn() + "`=(" + sql.toString() + ") ");
             sql2.append("FOR UPDATE ");
-            e = sqlExecuter.selectOne(connGetter, connCloser, sql2.toString(), sqlParam2.params, c);
+            e = sqlExecuter.selectOne(connGetter, connCloser, sql2.toString(), sqlParam.params, c);
+        } else {
+            e = super.getFirst();
         }
-        if (entityProxyFactory != null) {
+        if (entityProxyFactory != null && e != null) {
             e = entityProxyFactory.build(e);
         }
         return e;
