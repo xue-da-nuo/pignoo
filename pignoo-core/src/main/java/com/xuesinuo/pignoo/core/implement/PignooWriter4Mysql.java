@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 import com.xuesinuo.pignoo.core.Pignoo;
 import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.PignooFilter;
-import com.xuesinuo.pignoo.core.PignooFilter.FMode;
-import com.xuesinuo.pignoo.core.PignooReader;
 import com.xuesinuo.pignoo.core.PignooWriter;
 import com.xuesinuo.pignoo.core.PignooSorter;
 import com.xuesinuo.pignoo.core.entity.EntityProxyFactory;
