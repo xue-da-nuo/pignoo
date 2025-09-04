@@ -288,6 +288,9 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
                     if (filter.getMode() == FMode.NOT_LIKE) {
                         sql = "(" + sql + (sql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
                     }
+                    if (filter.getMode() == FMode.NE) {
+                        sql = "(" + sql + (sql.isBlank() ? "" : "OR ") + "`" + entityMapper.getColumnByFunction(filter.getField()) + "` IS NULL)";
+                    }
                 }
             }
         }
