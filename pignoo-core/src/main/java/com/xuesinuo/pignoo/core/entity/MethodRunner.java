@@ -21,7 +21,7 @@ public class MethodRunner {
     private final MethodHandle methodHandle;
 
     public Object run(Object bean, Object... args) throws Throwable {
-        if (methodHandle == null) {
+        if (methodHandle != null) {
             if (args == null || args.length == 0) {// 高频命中，if效率更高
                 return methodHandle.invoke(bean);
             } else if (args.length == 1) {
