@@ -1,7 +1,6 @@
 
 package com.xuesinuo.pignoo.core.implement;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Iterator;
@@ -32,7 +31,7 @@ import com.xuesinuo.pignoo.core.exception.MapperException;
  * @param <E> JavaBean Type
  * @author xuesinuo
  * @since 0.2.3
- * @version 1.1.0
+ * @version 1.1.3
  */
 public class PignooReader4Mysql<E> implements PignooReader<E> {
 
@@ -341,7 +340,7 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
             sql.append(sorter2Sql(sorter));
         }
         sql.append("LIMIT 1 ");
-        E e = sqlExecuter.selectOne(connGetter, connCloser, sql.toString(), sqlParam.params, c);
+        E e = sqlExecuter.selectOne(connGetter, connCloser, sql.toString(), sqlParam.params, c, config);
         return e;
     }
 
@@ -361,7 +360,7 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
             }
         }
         sql.append("LIMIT 1 ");
-        E e = sqlExecuter.selectOne(connGetter, connCloser, sql.toString(), sqlParam.params, c);
+        E e = sqlExecuter.selectOne(connGetter, connCloser, sql.toString(), sqlParam.params, c, config);
         return e;
     }
 
@@ -384,7 +383,7 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
             sql.append("ORDER BY ");
             sql.append(sorter2Sql(sorter));
         }
-        List<E> eList = sqlExecuter.selectList(connGetter, connCloser, sql.toString(), sqlParam.params, c);
+        List<E> eList = sqlExecuter.selectList(connGetter, connCloser, sql.toString(), sqlParam.params, c, config);
         return eList;
     }
 
@@ -408,7 +407,7 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
             sql.append(sorter2Sql(sorter));
         }
         sql.append("LIMIT " + offset + "," + limit + " ");
-        List<E> eList = sqlExecuter.selectList(connGetter, connCloser, sql.toString(), sqlParam.params, c);
+        List<E> eList = sqlExecuter.selectList(connGetter, connCloser, sql.toString(), sqlParam.params, c, config);
         return eList;
     }
 
@@ -713,9 +712,9 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         }
         Object primaryKeyValue = null;
         try {
-            primaryKeyValue = entityMapper.primaryKeyGetter().invoke(e);
-        } catch (IllegalAccessException | InvocationTargetException ex) {
-            throw new MapperException("Primary key is not found " + e, ex);
+            primaryKeyValue = entityMapper.primaryKeyGetter().run(e);
+        } catch (Throwable throwable) {
+            throw new MapperException("Primary key is not found " + e, throwable);
         }
         if (primaryKeyValue == null) {
             throw new MapperException("Primary key can not be NULL " + e);
@@ -744,9 +743,9 @@ public class PignooReader4Mysql<E> implements PignooReader<E> {
         }
         List<Object> pkList = collection.stream().filter(e -> e != null).map(e -> {
             try {
-                return entityMapper.primaryKeyGetter().invoke(e);
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new MapperException("Primary key is not found " + e, ex);
+                return entityMapper.primaryKeyGetter().run(e);
+            } catch (Throwable throwable) {
+                throw new MapperException("Primary key is not found " + e, throwable);
             }
         }).filter(pk -> pk != null).distinct().toList();
         if (pkList.size() != collection.size()) {

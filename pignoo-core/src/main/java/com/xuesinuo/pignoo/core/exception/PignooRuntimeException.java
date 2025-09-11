@@ -10,15 +10,15 @@ package com.xuesinuo.pignoo.core.exception;
  * @version 1.0.0
  */
 public class PignooRuntimeException extends RuntimeException {
-    public PignooRuntimeException(Exception e) {
-        super(e);
+    public PignooRuntimeException(Throwable throwable) {
+        super(throwable);
     }
 
     public PignooRuntimeException(String string) {
         super(string);
     }
 
-    public PignooRuntimeException(String string, Exception e) {
-        super(string, e);
+    public PignooRuntimeException(String string, Throwable throwable) {
+        super(string, throwable);
     }
 }

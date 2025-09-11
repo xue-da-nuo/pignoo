@@ -1,5 +1,8 @@
 package com.xuesinuo.pignoo.core.entity;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -21,7 +24,7 @@ import com.xuesinuo.pignoo.core.config.NamingMode;
  * @param <E> JavaBean Type
  * @author xuesinuo
  * @since 0.1.0
- * @version 1.0.0
+ * @version 1.1.3
  */
 public class ClassInfo<E> {
     protected Constructor<E> constructor;
@@ -29,13 +32,13 @@ public class ClassInfo<E> {
     protected Boolean autoPrimaryKey;
     protected Field primaryKeyField;
     protected String primaryKeyColumn;
-    protected Method primaryKeyGetter;
-    protected Method primaryKeySetter;
+    protected MethodRunner primaryKeyGetter;
+    protected MethodRunner primaryKeySetter;
 
     protected List<Field> fields = new ArrayList<>();
     protected List<String> columns = new ArrayList<>();
-    protected List<Method> getters = new ArrayList<>();
-    protected List<Method> setters = new ArrayList<>();
+    protected List<MethodRunner> getters = new ArrayList<>();
+    protected List<MethodRunner> setters = new ArrayList<>();
     protected List<String> getterNames = new ArrayList<>();
     protected List<String> setterNames = new ArrayList<>();
 
@@ -117,8 +120,9 @@ public class ClassInfo<E> {
                     this.primaryKeyField = field;
                 }
                 Method[] getterSetter = this.fields2GetterSetter(c, field);
-                this.primaryKeyGetter = getterSetter[0];
-                this.primaryKeySetter = getterSetter[1];
+                MethodHandle[] getterSetterHandle = this.fields2GetterSetterHandle(c, field);
+                this.primaryKeyGetter = new MethodRunner(getterSetter[0], getterSetterHandle[0]);
+                this.primaryKeySetter = new MethodRunner(getterSetter[1], getterSetterHandle[1]);
             }
             if (field.isAnnotationPresent(Column.class) || config.getAnnotationMode() == AnnotationMode.MIX) {
                 this.fields.add(field);
@@ -138,8 +142,9 @@ public class ClassInfo<E> {
                 }
                 this.columns.add(columnName);
                 Method[] getterSetter = this.fields2GetterSetter(c, field);
-                this.getters.add(getterSetter[0]);
-                this.setters.add(getterSetter[1]);
+                MethodHandle[] getterSetterHandle = this.fields2GetterSetterHandle(c, field);
+                this.getters.add(new MethodRunner(getterSetter[0], getterSetterHandle[0]));
+                this.setters.add(new MethodRunner(getterSetter[1], getterSetterHandle[1]));
                 this.getterNames.add(getterSetter[0].getName());
                 this.setterNames.add(getterSetter[1].getName());
             }
@@ -220,6 +225,32 @@ public class ClassInfo<E> {
             throw new MapperException("Entity " + c.getName() + " read setter failed", e);
         }
         return new Method[] { getter, setter };
+    }
+
+    private MethodHandle[] fields2GetterSetterHandle(Class<E> c, Field field) {
+        String fieldName = field.getName();
+        String capitalizedFieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+        String getterName = "get" + capitalizedFieldName;
+        String setterName = "set" + capitalizedFieldName;
+        if (field.getType() == boolean.class) {
+            if (fieldName.length() > 2 && fieldName.substring(0, 2).equals("is")) {
+                if (!Character.isLowerCase(fieldName.charAt(2))) {
+                    getterName = fieldName;
+                }
+            } else {
+                getterName = "is" + capitalizedFieldName;
+            }
+        }
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        MethodType getterMethodType = MethodType.methodType(field.getType());
+        MethodType setterMethodType = MethodType.methodType(void.class, field.getType());
+        try {
+            MethodHandle getterMethodHandle = lookup.findVirtual(c, getterName, getterMethodType);
+            MethodHandle setterMethodHandle = lookup.findVirtual(c, setterName, setterMethodType);
+            return new MethodHandle[] { getterMethodHandle, setterMethodHandle };
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new MapperException("Entity " + c.getName() + " read getter failed", e);
+        }
     }
 
     private String camel2Underline(String str) {

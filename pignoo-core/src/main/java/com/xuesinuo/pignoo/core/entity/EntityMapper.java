@@ -2,13 +2,14 @@ package com.xuesinuo.pignoo.core.entity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import com.xuesinuo.pignoo.core.PignooConfig;
-import com.xuesinuo.pignoo.core.exception.MapperException;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 /**
  * 实体映射器，启动包很类信息、getter方法与属性名的映射器
@@ -18,14 +19,21 @@ import com.xuesinuo.pignoo.core.exception.MapperException;
  * @param <E> JavaBean Type
  * @author xuesinuo
  * @since 0.1.0
- * @version 0.1.0
+ * @version 1.1.3
  */
 public class EntityMapper<E> {
 
     private final Class<E> c;
     private ClassInfo<E> classInfo;
     private FunctionNameGetter<E> functionNameGetter;
-    private static final ConcurrentHashMap<Class<?>, EntityMapper<?>> cache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<CacheKey, EntityMapper<?>> cache = new ConcurrentHashMap<>();
+
+    @AllArgsConstructor
+    @Data
+    private static class CacheKey {
+        Class<?> c;
+        PignooConfig config;
+    }
 
     private EntityMapper(Class<E> c, PignooConfig config) {
         this.c = c;
@@ -53,34 +61,11 @@ public class EntityMapper<E> {
      */
     @SuppressWarnings("unchecked")
     public static <E> EntityMapper<E> build(Class<E> c, PignooConfig config) {
-        EntityMapper<E> mapper = (EntityMapper<E>) cache.get(c);
+        CacheKey cacheKey = new CacheKey(c, config);
+        EntityMapper<E> mapper = (EntityMapper<E>) cache.get(cacheKey);
         if (mapper == null) {
             mapper = new EntityMapper<>(c, config);
-            cache.put(c, mapper);
-        }
-        return mapper;
-    }
-
-    /**
-     * 实体解析器构造函数
-     * <p>
-     * Entity Parser Constructor
-     *
-     * @param c   要解析的类型
-     *            <p>
-     *            Type to be parsed
-     * @param <E> 要解析的类型
-     *            <p>
-     *            Type to be parsed
-     * @return 类型解析器
-     *         <p>
-     *         Type Parser
-     */
-    @SuppressWarnings("unchecked")
-    public static <E> EntityMapper<E> build(Class<E> c) {
-        EntityMapper<E> mapper = (EntityMapper<E>) cache.get(c);
-        if (mapper == null) {
-            throw new MapperException("EntityMapper not found for " + c.getName() + ", please use EntityMapper.build(Class<E> c, PignooConfig config) to init EntityMapper first.");
+            cache.put(cacheKey, mapper);
         }
         return mapper;
     }
@@ -175,7 +160,7 @@ public class EntityMapper<E> {
      *
      * @return getters
      */
-    public List<Method> getters() {
+    public List<MethodRunner> getters() {
         return classInfo.getters;
     }
 
@@ -184,7 +169,7 @@ public class EntityMapper<E> {
      *
      * @return setters
      */
-    public List<Method> setters() {
+    public List<MethodRunner> setters() {
         return classInfo.setters;
     }
 
@@ -223,7 +208,7 @@ public class EntityMapper<E> {
      *         <p>
      *         primary key getter
      */
-    public Method primaryKeyGetter() {
+    public MethodRunner primaryKeyGetter() {
         return classInfo.primaryKeyGetter;
     }
 

@@ -10,15 +10,15 @@ package com.xuesinuo.pignoo.core.exception;
  * @version 1.0.0
  */
 public class DataSourceException extends RuntimeException {
-    public DataSourceException(Exception e) {
-        super(e);
+    public DataSourceException(Throwable throwable) {
+        super(throwable);
     }
 
     public DataSourceException(String string) {
         super(string);
     }
 
-    public DataSourceException(String string, Exception e) {
-        super(string, e);
+    public DataSourceException(String string, Throwable throwable) {
+        super(string, throwable);
     }
 }

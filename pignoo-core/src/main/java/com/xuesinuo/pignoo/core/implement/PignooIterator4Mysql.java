@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import com.xuesinuo.pignoo.core.PignooSorter.SMode;
+import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.SqlExecuter;
 import com.xuesinuo.pignoo.core.entity.SqlParam;
 import com.xuesinuo.pignoo.core.exception.MapperException;
@@ -18,7 +19,7 @@ import com.xuesinuo.pignoo.core.exception.MapperException;
  * 
  * @author xuesinuo
  * @version 1.1.0
- * @since 1.1.0
+ * @since 1.1.3
  */
 public class PignooIterator4Mysql<E> implements Iterator<E> {
     /**
@@ -30,6 +31,7 @@ public class PignooIterator4Mysql<E> implements Iterator<E> {
 
     private final PignooReader4Mysql<E> reader;
     private final PignooWriter4Mysql<E> writer;
+    private final PignooConfig config;
     private final Class<E> c;
     private final boolean isReadOnly;
     private final int step;
@@ -62,6 +64,7 @@ public class PignooIterator4Mysql<E> implements Iterator<E> {
     public PignooIterator4Mysql(PignooReader4Mysql<E> reader, Class<E> c, boolean isReadOnly, int step, long offset, long limit, SMode idSortMode) {
         this.reader = reader.copyReader();
         this.writer = reader.copyWriter();
+        this.config = reader.config;
         this.c = c;
         this.isReadOnly = isReadOnly;
         this.step = step;
@@ -97,8 +100,12 @@ public class PignooIterator4Mysql<E> implements Iterator<E> {
             } else {
                 sqlWhere += "< ";
             }
-            Object lastPk = this.reader.entityMapper.primaryKeyGetter().invoke(list.getLast());
-            sqlWhere += sqlParam.next(lastPk) + " ";
+            try {
+                Object lastPk = this.reader.entityMapper.primaryKeyGetter().run(list.getLast());
+                sqlWhere += sqlParam.next(lastPk) + " ";
+            } catch (Throwable throwable) {
+                throw new MapperException("Get primary key failed in iterator", throwable);
+            }
         }
         if (this.reader.filter != null) {
             String thisWhere = this.reader.filter2Sql(this.reader.filter, sqlParam);
@@ -119,7 +126,7 @@ public class PignooIterator4Mysql<E> implements Iterator<E> {
         } else {
             sql.append("LIMIT " + this.step + " ");
         }
-        this.list = sqlExecuter.selectList(this.reader.connGetter, this.reader.connCloser, sql.toString(), sqlParam.params, this.c);
+        this.list = sqlExecuter.selectList(this.reader.connGetter, this.reader.connCloser, sql.toString(), sqlParam.params, this.c, config);
         this.stepIndex = 0;
     }
 

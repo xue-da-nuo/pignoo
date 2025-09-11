@@ -26,10 +26,11 @@ public interface SqlExecuter {
      * @param sql        要执行的SQL
      * @param params     SQL参数
      * @param c          执行结果的映射对象类型
+     * @param config     配置
      * @param <E>        执行结果的映射对象类型
      * @return 查询结果
      */
-    <E> E selectOne(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c);
+    <E> E selectOne(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c, PignooConfig config);
 
     /**
      * 查询实体List
@@ -39,10 +40,11 @@ public interface SqlExecuter {
      * @param sql        要执行的SQL
      * @param params     SQL参数
      * @param c          执行结果的映射对象类型
+     * @param config     配置
      * @param <E>        执行结果的映射对象类型
      * @return 查询结果
      */
-    <E> List<E> selectList(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c);
+    <E> List<E> selectList(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c, PignooConfig config);
 
     /**
      * 查询Map结果

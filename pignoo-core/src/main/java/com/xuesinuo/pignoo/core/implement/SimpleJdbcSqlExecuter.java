@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.xuesinuo.pignoo.core.PignooConfig;
 import com.xuesinuo.pignoo.core.SqlExecuter;
 import com.xuesinuo.pignoo.core.entity.EntityMapper;
 import com.xuesinuo.pignoo.core.exception.MapperException;
@@ -30,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author xuesinuo
  * @since 0.1.0
- * @version 0.3.1
+ * @version 1.1.3
  */
 @Slf4j
 @NoArgsConstructor
@@ -55,13 +56,13 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
     }
 
     @Override
-    public <E> E selectOne(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c) {
+    public <E> E selectOne(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c, PignooConfig config) {
         long startTime = System.currentTimeMillis();
         if (saveLog) {
             log.debug(sql);
             log.debug(params.toString());
         }
-        EntityMapper<E> mapper = EntityMapper.build(c);
+        EntityMapper<E> mapper = EntityMapper.build(c, config);
         Connection conn = null;
         try {
             conn = connGetter.get();
@@ -75,7 +76,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                         for (int i = 0; i < mapper.columns().size(); i++) {
                             String columnName = mapper.columns().get(i);
                             Object columnValue = getObject(rs, mapper.fields().get(i).getType(), null, columnName);
-                            mapper.setters().get(i).invoke(entity, columnValue);
+                            mapper.setters().get(i).run(entity, columnValue);
                         }
                         if (saveLog) {
                             log.debug("1 row(s) in " + (System.currentTimeMillis() - startTime) + " ms");
@@ -84,7 +85,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw handleException(e);
         } finally {
             if (conn != null) {
@@ -95,13 +96,13 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
     }
 
     @Override
-    public <E> List<E> selectList(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c) {
+    public <E> List<E> selectList(Supplier<Connection> connGetter, Consumer<Connection> connCloser, String sql, Map<Integer, Object> params, Class<E> c, PignooConfig config) {
         long startTime = System.currentTimeMillis();
         if (saveLog) {
             log.debug(sql);
             log.debug(params.toString());
         }
-        EntityMapper<E> mapper = EntityMapper.build(c);
+        EntityMapper<E> mapper = EntityMapper.build(c, config);
         ArrayList<E> list = new ArrayList<>();
         Connection conn = null;
         try {
@@ -116,13 +117,13 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
                         for (int i = 0; i < mapper.columns().size(); i++) {
                             String columnName = mapper.columns().get(i);
                             Object columnValue = getObject(rs, mapper.fields().get(i).getType(), null, columnName);
-                            mapper.setters().get(i).invoke(entity, columnValue);
+                            mapper.setters().get(i).run(entity, columnValue);
                         }
                         list.add(entity);
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw handleException(e);
         } finally {
             if (conn != null) {
@@ -276,7 +277,7 @@ public class SimpleJdbcSqlExecuter implements SqlExecuter {
         }
     }
 
-    private static final RuntimeException handleException(Exception e) {
+    private static final RuntimeException handleException(Throwable e) {
         if (e instanceof SQLException) {
             return new SqlExecuteException((SQLException) e);
         }
