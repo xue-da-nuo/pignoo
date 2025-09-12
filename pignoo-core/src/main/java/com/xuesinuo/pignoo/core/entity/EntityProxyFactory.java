@@ -68,7 +68,7 @@ public class EntityProxyFactory<E> {
                         Object invokeResult = method.invoke($proxy, args);
                         String methodName = method.getName();
                         int index = setterNames.indexOf(methodName);
-                        if (index >= 0 && method.getParameterCount() == 1) {
+                        if (index >= 0 && method.getParameterCount() == 1 && fields.get(index).getType().isAssignableFrom(method.getParameterTypes()[0])) {
                             Object fieldValue = fields.get(index).get($proxy);
                             updater.run(index, fieldValue, $proxy);
                         }
