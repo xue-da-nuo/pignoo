@@ -16,6 +16,9 @@ import com.xuesinuo.pignoo.core.annotation.Table;
 import com.xuesinuo.pignoo.core.config.AnnotationMode;
 import com.xuesinuo.pignoo.core.config.PrimaryKeyNamingConvention;
 import com.xuesinuo.pignoo.core.exception.MapperException;
+
+import lombok.Data;
+
 import com.xuesinuo.pignoo.core.config.NamingMode;
 
 /**
@@ -198,18 +201,41 @@ public class ClassInfo<E> {
         }
     }
 
+    public static void main(String[] args) {
+        System.out.println(Character.isLowerCase('_'));
+        Pig pig = new Pig();
+        pig.is$();
+        pig.is0();
+        pig.isB();
+        pig.isIsa();
+        pig.isX();
+        pig.setX(false);
+        pig.set$(false);
+    }
+
+    @Data
+    public static class Pig {
+        boolean x;
+        boolean isa;
+        boolean isB;
+        boolean is_;
+        boolean is0;
+        boolean is$;
+    }
+
     private Method[] fields2GetterSetter(Class<E> c, Field field) {
         String fieldName = field.getName();
         String capitalizedFieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
         String getterName = "get" + capitalizedFieldName;
         String setterName = "set" + capitalizedFieldName;
         if (field.getType() == boolean.class) {
-            if (fieldName.length() > 2 && fieldName.substring(0, 2).equals("is")) {
-                if (!Character.isLowerCase(fieldName.charAt(2))) {
-                    getterName = fieldName;
-                }
-            } else {
+            if (fieldName.length() > 2 && fieldName.substring(0, 2).equals("is") && Character.isLowerCase(fieldName.charAt(2))) {
                 getterName = "is" + capitalizedFieldName;
+            } else if (fieldName.length() <= 2 || !fieldName.substring(0, 2).equals("is")) {
+                getterName = "is" + capitalizedFieldName;
+            } else {
+                getterName = fieldName;
+                setterName = "set" + fieldName.substring(2);
             }
         }
         Method getter;
