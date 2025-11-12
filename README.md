@@ -80,7 +80,6 @@ pignoo.writer(Pig.class) // 从Pignoo获取PigList
 
 ## TODO List
 
-- [ ] 支持javax.persistence.Id声明数据库主键
 - [ ] 支持多组缓存Bean解析，代替static缓存Bean解析；将Bean的解析放入Pignoo运行环境。
 - [x] 高级的数据集合操作
   - [x] iterator游标查询，并指定游标跳页数量
