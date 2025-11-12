@@ -1,5 +1,7 @@
 package com.xuesinuo.pignoo.core.config;
 
+import java.lang.reflect.Field;
+
 /**
  * 主键命名规则
  * <p>
@@ -11,7 +13,7 @@ package com.xuesinuo.pignoo.core.config;
  *
  * @author xuesinuo
  * @since 0.2.0
- * @version 0.2.0
+ * @version 1.1.6
  */
 @FunctionalInterface
 public interface PrimaryKeyNamingConvention {
@@ -26,16 +28,22 @@ public interface PrimaryKeyNamingConvention {
      * @param className 类名
      *                  <p>
      *                  Class Name
+     * @param c         类
+     *                  <p>
+     *                  Class
+     * @param fields    字段数组
+     *                  <p>
+     *                  Fields Array
      * @return 主键名
      *         <p>
      *         PrimaryKey Name
      */
-    String naming(String tableName, String className);
+    String naming(String tableName, String className, Class<?> c, Field[] fields);
 
     /**
      * 默认主键叫“id”
      * <p>
      * Default PrimaryKey is "id"
      */
-    public static PrimaryKeyNamingConvention DEFAULT = (tableName, className) -> "id";
+    public static PrimaryKeyNamingConvention DEFAULT = (tableName, className, c, fields) -> "id";
 }

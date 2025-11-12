@@ -155,9 +155,9 @@ public class ClassInfo<E> {
         if (this.primaryKeyField == null) {
             String pkName;
             if (config.getPrimaryKeyNamingConvention() != null) {
-                pkName = config.getPrimaryKeyNamingConvention().naming(tableName, c.getSimpleName());
+                pkName = config.getPrimaryKeyNamingConvention().naming(tableName, c.getSimpleName(), c, classFields);
             } else {
-                pkName = PrimaryKeyNamingConvention.DEFAULT.naming(tableName, c.getSimpleName());
+                pkName = PrimaryKeyNamingConvention.DEFAULT.naming(tableName, c.getSimpleName(), c, classFields);
             }
             if (pkName == null || pkName.isBlank()) {
                 throw new MapperException("Entity " + c.getName() + " PrimaryKey not found");
