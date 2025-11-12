@@ -80,20 +80,8 @@ pignoo.writer(Pig.class) // 从Pignoo获取PigList
 
 ## TODO List
 
-- [x] SpringAOP替换为ByteBuddy
-- [x] 全局配置允许关闭代理
-- [x] 扩展数据集合操作
-  - [x] getOne改为getAny忽略排序条件的查询（效率更高）
-  - [x] getFirst（使用排序条件）
-  - [x] pollFirst
-  - [x] pollAny
-  - [x] containsId
-  - [x] containsIds
-  - [x] max maxNullAs
-  - [x] min minNullAs
-  - [x] sum sumNullAs
-  - [x] avg avgNullAs
-  - [x] count countNullAs
+- [ ] 支持javax.persistence.Id声明数据库主键
+- [ ] 支持多组缓存Bean解析，代替static缓存Bean解析；将Bean的解析放入Pignoo运行环境。
 - [x] 高级的数据集合操作
   - [x] iterator游标查询，并指定游标跳页数量
   - [ ] spliterator 并行遍历器
